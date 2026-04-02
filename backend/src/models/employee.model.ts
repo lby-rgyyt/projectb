@@ -50,8 +50,8 @@ interface IEmployee extends Document {
   emergencyContacts?: IContact[];
 
   documents?: Map<string, Types.ObjectId>;
-  onboardingApplication?: Types.ObjectId;
-  visaStatus?: Types.ObjectId;
+  onboardingApplication: Types.ObjectId | null;
+  visaStatus: Types.ObjectId | null;
 }
 
 const addressSchema = new Schema<IAddress>(
@@ -127,10 +127,12 @@ const employeeSchema = new Schema<IEmployee>(
     onboardingApplication: {
       type: Schema.Types.ObjectId,
       ref: "OnboardingApplication",
+      default: null,
     },
     visaStatus: {
       type: Schema.Types.ObjectId,
       ref: "VisaStatus",
+      default: null,
     },
   },
   { timestamps: true },
