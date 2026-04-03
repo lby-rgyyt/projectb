@@ -1,4 +1,4 @@
-import mongoose, { Schema,Document } from "mongoose";
+import mongoose, { Schema,Document,Types } from "mongoose";
 
 interface IRegistrationToken extends Document {
   email: string;
@@ -6,6 +6,7 @@ interface IRegistrationToken extends Document {
   token: string;
   link: string;
   status: "pending" | "registered" | "expired";
+  createdBy:Types.ObjectId;
   createdAt: Date;
 }
 
@@ -18,6 +19,11 @@ const registerTokenSchema = new Schema<IRegistrationToken>({
     type: String,
     enum: ["pending", "registered", "expired"],
     default: "pending",
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: "Employee",
+    required: true,
   },
   createdAt: {
     type: Date,

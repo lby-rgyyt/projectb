@@ -28,3 +28,13 @@ export const authentication = async (
     res.status(401).json({ success: false, error: "Invalid token" });
   }
 };
+
+export const authorize = (...roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.employee || !roles.includes(req.employee.role)) {
+      res.status(403).json({ message: "Forbidden" });
+      return;
+    }
+    next();
+  };
+};

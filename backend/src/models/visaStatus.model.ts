@@ -6,6 +6,7 @@ interface IVisaStatus extends Document {
   currentStatus: "pending" | "approved" | "rejected";
   feedback?: string;
   documents?: Map<string, Types.ObjectId>;
+  inProgress: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +34,7 @@ const visaStatusSchema = new Schema<IVisaStatus>(
       of: { type: Schema.Types.ObjectId, ref: "Document" },
       default: new Map(),
     },
+    inProgress: { type: Boolean, default: true },
   },
   { timestamps: true },
 );
