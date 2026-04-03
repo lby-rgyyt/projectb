@@ -21,3 +21,19 @@ export const getEmployeeById = async (
     next(err);
   }
 };
+
+export const getAllEmployees = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const employees = await Employee.find();
+    res.status(200).json({
+      success: true,
+      employees: employees,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

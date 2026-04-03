@@ -1,7 +1,7 @@
 import mongoose, { Schema, Types, Document } from "mongoose";
 
 interface IOnboardingApplication extends Document {
-  employee: Types.ObjectId;
+  employeeId: Types.ObjectId;
   status: "pending" | "approved" | "rejected";
   feedback?: string;
   documents?: Map<string, Types.ObjectId>;
@@ -11,7 +11,7 @@ interface IOnboardingApplication extends Document {
 
 const onboardingApplicationSchema = new Schema<IOnboardingApplication>(
   {
-    employee: {
+    employeeId: {
       type: Schema.Types.ObjectId,
       ref: "Employee",
       required: true,

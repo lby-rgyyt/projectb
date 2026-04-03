@@ -28,10 +28,14 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/employees", employeeRouter);
-app.use("/api/registrationTokens", registrationTokenRouter);
-app.use("/api/onboardingApplications", onboardingApplicationRouter);
-app.use("/api/visaStatus", visaStatusRouter);
+app.use("/api/registration-tokens", registrationTokenRouter);
+app.use("/api/onboarding-applications", onboardingApplicationRouter);
+app.use("/api/visa-status", visaStatusRouter);
 
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error(err);
+  res.status(500).json({ success: false, message: err.message || "Internal server error" });
+});
 
 
 

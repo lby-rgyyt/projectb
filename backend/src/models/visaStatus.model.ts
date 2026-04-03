@@ -1,7 +1,7 @@
 import mongoose, { Schema, Types, Document } from "mongoose";
 
 interface IVisaStatus extends Document {
-  employee: Types.ObjectId;
+  employeeId: Types.ObjectId;
   currentStep: "optReceipt" | "optEAD" | "i983" | "i20" | "completed";
   currentStatus: "pending" | "approved" | "rejected";
   feedback?: string;
@@ -13,7 +13,7 @@ interface IVisaStatus extends Document {
 
 const visaStatusSchema = new Schema<IVisaStatus>(
   {
-    employee: {
+    employeeId: {
       type: Schema.Types.ObjectId,
       ref: "Employee",
       required: true,
