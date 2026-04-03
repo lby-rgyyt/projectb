@@ -53,9 +53,9 @@ export const login = async (
 ): Promise<void> => {
   try {
     const { username, password } = req.body;
-    const employee = await Employee.findOne({ username }).select("+password");
+    const employee = await Employee.findOne({ username }).select("+password").populate("onboardingApplication");
     if (!employee) {
-      res.status(401).json({ success: false, errors: "Employee not existed" });
+      res.status(401).json({ success: false, errors: "Username not existed" });
       return;
     }
     const isMatch = await bcrypt.compare(password, employee.password);
@@ -95,7 +95,7 @@ export const getMe = async (
       return;
     }
     const { id } = req.employee;
-    const employee = await Employee.findById(id);
+    const employee = await Employee.findById(id).populate("onboardingApplication");
     if (!employee) {
       res.status(404).json({ success: false, error: "Employee not found" });
       return;
