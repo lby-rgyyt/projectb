@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { AuthState } from "../../types";
 import axios from "axios";
 
 export const fetchCurrentEmployee = createAsyncThunk(
@@ -23,7 +24,7 @@ export const fetchCurrentEmployee = createAsyncThunk(
   },
 );
 
-const initialState = {
+const initialState: AuthState = {
   token: localStorage.getItem("token"),
   employee: null,
   loading: false,

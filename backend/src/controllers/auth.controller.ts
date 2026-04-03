@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import Employee from "../models/employee.model.js";
+import RegisterToken from "../models/registrationToken.js";
 import type { Request, Response, NextFunction } from "express";
 
 export const register = async (
@@ -9,7 +10,7 @@ export const register = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, registrationToken } = req.body;
     const existing = await Employee.find({ $or: [{ username }, { email }] });
     const errors: Record<string, string> = {};
     for (const record of existing) {
@@ -25,6 +26,10 @@ export const register = async (
       return;
     }
     const employee = await Employee.create({ username, email, password });
+    await RegisterToken.findOneAndUpdate(
+      { token: registrationToken },
+      { status: "registered" },
+    );
     const token = jwt.sign(
       { id: employee._id, role: employee.role },
       process.env.JWT_SECRET as string,
@@ -53,7 +58,9 @@ export const login = async (
 ): Promise<void> => {
   try {
     const { username, password } = req.body;
-    const employee = await Employee.findOne({ username }).select("+password").populate("onboardingApplication");
+    const employee = await Employee.findOne({ username })
+      .select("+password")
+      .populate("onboardingApplication");
     if (!employee) {
       res.status(401).json({ success: false, errors: "Username not existed" });
       return;
@@ -95,7 +102,9 @@ export const getMe = async (
       return;
     }
     const { id } = req.employee;
-    const employee = await Employee.findById(id).populate("onboardingApplication");
+    const employee = await Employee.findById(id).populate(
+      "onboardingApplication",
+    );
     if (!employee) {
       res.status(404).json({ success: false, error: "Employee not found" });
       return;

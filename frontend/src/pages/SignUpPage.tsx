@@ -1,13 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { SubmitEvent } from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../store";
 import { setCredentials } from "../store/slices/authSlice";
 
 const SignUpPage = () => {
-  const { email } = useParams();
+  const [searchParams] = useSearchParams();
+  const registrationToken = searchParams.get("token");
+  const email = searchParams.get("email");
+
+  const [tokenValid, setTokenValid] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [tokenError, setTokenError] = useState("");
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +28,36 @@ const SignUpPage = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+
+  const checkToken = async () => {
+    try {
+      await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/registration-tokens/check`,
+        { params: { token: registrationToken } },
+      );
+      setTokenValid(true);
+    } catch (error) {
+      setTokenValid(false);
+      if (axios.isAxiosError(error) && error.response) {
+        setTokenError(error.response.data.message);
+      } else {
+        setTokenError("Network error");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = () => {
+      if (!registrationToken || !email) {
+        setLoading(false);
+        return;
+      }
+      checkToken();
+    };
+    fetchData();
+  }, []);
 
   const validate = () => {
     let valid = true;
@@ -85,6 +121,17 @@ const SignUpPage = () => {
     }
   };
 
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+  if (!tokenValid)
+    return (
+      <div>
+        <h1>Invalid Registration Link</h1>
+        <p>{tokenError || "This registration link is invalid or expired."}</p>
+      </div>
+    );
+
   return (
     <>
       <h1>Create Account</h1>
@@ -102,7 +149,7 @@ const SignUpPage = () => {
         </div>
         <div>
           <label>Email</label>
-          <input disabled type="text" value={email} />
+          <input disabled type="text" value={email || ""} />
           {emailError && <span>{emailError}</span>}
         </div>
         <div>
