@@ -83,3 +83,34 @@ export const login = async (
     next(err);
   }
 };
+
+export const getMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.employee) {
+      res.status(401).json({ success: false, error: "Not authenticated" });
+      return;
+    }
+    const { id } = req.employee;
+    const employee = await Employee.findById(id);
+    if (!employee) {
+      res.status(404).json({ success: false, error: "Employee not found" });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      employee: {
+        id: employee._id,
+        username: employee.username,
+        email: employee.email,
+        role: employee.role,
+        onboardingApplication: employee.onboardingApplication,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
