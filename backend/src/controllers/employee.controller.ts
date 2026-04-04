@@ -38,6 +38,33 @@ export const getAllEmployees = async (
   }
 };
 
+export const getEmployeesByName = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { name } = req.query;
+    // no query, retuan all employees
+    if (!name || typeof name !== "string") {
+      const employees = await Employee.find();
+      res.status(200).json({ success: true, employees: employees });
+      return;
+    }
+    const regex = new RegExp(name, "i");
+    const employees = await Employee.find({
+      $or: [
+        { firstName: regex },
+        { lastName: regex },
+        { preferredName: regex },
+      ],
+    }).sort({ lastName: 1 });
+    res.status(200).json({ success: true, employees: employees });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const updateEmployeeInfo = async (
   req: Request,
   res: Response,
