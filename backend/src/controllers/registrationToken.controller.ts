@@ -1,5 +1,66 @@
 import type { Request, Response, NextFunction } from "express";
 import RegisterToken from "../models/registrationToken.js";
+import Employee from "../models/employee.model.js";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
+
+export const sendRegistrationEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.employee) {
+      res.status(401).json({ success: false, error: "Not authenticated" });
+      return;
+    }
+    const { name, email } = req.body;
+    const existing = await RegisterToken.findOne({ email });
+    if (existing) {
+      res.status(409).json({ success: false, message: "Email already sent." });
+      return;
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const link = `${process.env.FRONTEND_URL}/signup?token=${token}&email=${email}`;
+
+    await RegisterToken.create({
+      email,
+      name,
+      token,
+      link,
+      status: "pending",
+      createdBy: req.employee.id,
+    });
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Create your account",
+      html: `
+            <h2>Welcome to HR Portal, ${name}!</h2>
+            <p>Please click the link below to create your account:</p>
+            <a href="${link}">${link}</a>
+            <p>This link will expire in 3 hours.</p>
+            `,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "A registration link has been sent.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const getTokenHistory = async (
   req: Request,
@@ -14,7 +75,7 @@ export const getTokenHistory = async (
       },
       { status: "expired" },
     );
-    const tokens = await RegisterToken.find();
+    const tokens = await RegisterToken.find().sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       tokens: tokens,
@@ -56,6 +117,6 @@ export const checkToken = async (
     }
     res.status(200).json({ success: true, message: "Token is valid." });
   } catch (err) {
-    next();
+    next(err);
   }
 };

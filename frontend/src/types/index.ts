@@ -1,5 +1,5 @@
 export interface OnboardingApplication {
-  _id: string;
+  id: string;
   employeeId: string;
   status: "pending" | "approved" | "rejected";
   feedback?: string;
@@ -41,6 +41,15 @@ export interface Employee {
     relationship?: string;
   }[];
   onboardingApplication: OnboardingApplication | null;
+}
+
+export interface RegistrationToken {
+  id:string;
+  email:string;
+  name:string;
+  token:string;
+  link:string;
+  status: "pending" | "registered" | "expired";
 }
 
 export interface AuthState {
