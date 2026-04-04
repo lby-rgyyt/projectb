@@ -5,6 +5,8 @@ import type { RootState } from "../store";
 import type { Employee } from "../types";
 import axios from "axios";
 import NameSection from "../components/sections/NameSection";
+import AddressSection from "../components/sections/AddressSection";
+import ContactInfoSection from "../components/sections/ContactInfoSection";
 
 const EmployeeInfoPage = () => {
   // hr
@@ -59,6 +61,7 @@ const EmployeeInfoPage = () => {
           ? "Personal Information"
           : `${employee.firstName} ${employee.lastName}`}
       </h1>
+
       <NameSection
         defaultValues={{
           firstName: employee.firstName || "",
@@ -73,6 +76,27 @@ const EmployeeInfoPage = () => {
         editable={editable}
         profilePicture={employee.profilePicture}
         onUploadPicture={onUploadPicture}
+      />
+
+      <AddressSection
+        defaultValues={{
+          address: {
+            building: employee.address?.building || "",
+            streetName: employee.address?.streetName || "",
+            city: employee.address?.city || "",
+            state: employee.address?.state || "",
+            zip: employee.address?.zip || "",
+          },
+        }}
+        editable={editable}
+      />
+
+      <ContactInfoSection
+        defaultValues={{
+          cellPhone: employee.cellPhone || "",
+          workPhone: employee.workPhone || "",
+        }}
+        editable={editable}
       />
     </div>
   );

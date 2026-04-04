@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 interface IAddress {
   building?: string;
-  street?: string;
+  streetName?: string;
   city?: string;
   state?: string;
   zip?: string;
@@ -57,7 +57,7 @@ interface IEmployee extends Document {
 const addressSchema = new Schema<IAddress>(
   {
     building: String,
-    street: String,
+    streetName: String,
     city: String,
     state: String,
     zip: String,

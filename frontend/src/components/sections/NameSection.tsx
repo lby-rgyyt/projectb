@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../store";
-import axios from "axios";
+import useEditableSection from "../../hooks/useEditableSection";
+import SectionHeader from "../SectionHeader";
 
 interface NameFormData {
   firstName: string;
@@ -30,60 +27,22 @@ const NameSection = ({
   profilePicture,
   onUploadPicture,
 }: NameSectionProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const token = useSelector((state: RootState) => state.auth.token);
-
   const {
+    isEditing,
+    setIsEditing,
     register,
+    errors,
     handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<NameFormData>({
-    defaultValues,
-  });
+    onSave,
+    onCancel,
+  } = useEditableSection<NameFormData>(defaultValues);
 
   const disabled = !isEditing;
 
-  // modify it later, needs a real api call, updateEmployeeInfo
-  const onSave = async (data: NameFormData) => {
-    try {
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/employees/update`,
-        data,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      setIsEditing(false);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        alert(error.response.data.error || "Network error, please try again");
-      }
-    }
-  };
-
-  const onCancel = () => {
-    reset();
-    setIsEditing(false);
-  };
-
   return (
     <div>
-      <div>
-        <label>Profile Picture</label>
-        <img src={profilePicture || "default_avatar.png"} alt="avatar" />
-        {isEditing && (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file && onUploadPicture) onUploadPicture(file);
-            }}
-          />
-        )}
-      </div>
-
-      <div>
-        <h3>Name</h3>
+      {/* <div>
+        <h3>Address</h3>
         {editable &&
           (isEditing ? (
             <div>
@@ -99,6 +58,28 @@ const NameSection = ({
               Edit
             </button>
           ))}
+      </div> */}
+      <SectionHeader
+        title="Address"
+        editable={editable}
+        isEditing={isEditing}
+        onEdit={() => setIsEditing(true)}
+        onCancel={onCancel}
+        onSave={handleSubmit(onSave)}
+      />
+      <div>
+        <label>Profile Picture</label>
+        <img src={profilePicture || "default_avatar.png"} alt="avatar" />
+        {isEditing && (
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file && onUploadPicture) onUploadPicture(file);
+            }}
+          />
+        )}
       </div>
 
       <div>

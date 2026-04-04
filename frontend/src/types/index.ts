@@ -22,7 +22,7 @@ export interface Employee {
   gender?: string;
   address?: {
     building?: string;
-    street?: string;
+    streetName?: string;
     city?: string;
     state?: string;
     zip?: string;
