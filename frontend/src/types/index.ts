@@ -7,15 +7,40 @@ export interface OnboardingApplication {
   createdAt: string;
   updatedAt: string;
 }
+export interface Employee {
+  id: string;
+  username: string;
+  email: string;
+  role: "employee" | "hr";
+  firstName?: string;
+  lastName?: string;
+  middleName?: string;
+  preferredName?: string;
+  profilePicture?: string;
+  ssn?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  address?: {
+    building?: string;
+    street?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+  };
+  cellPhone?: string;
+  workPhone?: string;
+  emergencyContacts?: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    email?: string;
+    relationship?: string;
+  }[];
+  onboardingApplication: OnboardingApplication | null;
+}
 
 export interface AuthState {
   token: string | null;
-  employee: {
-    id: string;
-    username: string;
-    email: string;
-    role: "employee" | "hr";
-    onboardingApplication: OnboardingApplication | null;
-  } | null;
+  employee: Employee | null;
   loading: boolean;
 }

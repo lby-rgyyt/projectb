@@ -94,6 +94,7 @@ const SignUpPage = () => {
           username,
           email,
           password,
+          registrationToken
         },
       );
       dispatch(

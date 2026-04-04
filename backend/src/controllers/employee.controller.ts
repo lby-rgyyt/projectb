@@ -37,3 +37,51 @@ export const getAllEmployees = async (
     next(err);
   }
 };
+
+export const updateEmployeeInfo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const allowedFields = [
+      "firstName",
+      "lastName",
+      "middleName",
+      "preferredName",
+      "ssn",
+      "dateOfBirth",
+      "gender",
+      "address",
+      "cellPhone",
+      "workPhone",
+      "emergencyContacts",
+    ];
+    const updates: Record<string, any> = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+    if (!req.employee) {
+      res.status(401).json({ success: false, error: "Not authenticated" });
+      return;
+    }
+    const { id } = req.employee;
+    const employee = await Employee.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true },
+    );
+    if (!employee) {
+      res.status(404).json({ success: false, error: "Employee not found" });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      employee: employee,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
