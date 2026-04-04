@@ -14,6 +14,8 @@ const useEditableSection = <T extends FieldValues>(
     register,
     handleSubmit,
     reset,
+    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<T>({ defaultValues });
   const onSave = async (data: T) => {
@@ -49,6 +51,8 @@ const useEditableSection = <T extends FieldValues>(
     register,
     errors,
     disabled:!isEditing,
+    watch,
+    control,
   };
 };
 

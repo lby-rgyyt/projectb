@@ -37,7 +37,7 @@ const NameSection = ({
   return (
     <div>
       <SectionHeader
-        title="Address"
+        title="Name"
         editable={editable}
         {...headerProps}
       />

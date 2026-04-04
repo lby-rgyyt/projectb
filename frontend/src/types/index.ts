@@ -27,6 +27,10 @@ export interface Employee {
     state?: string;
     zip?: string;
   };
+  visaType?:string;
+  visaTitle?:string;
+  visaStartDate?: string;
+  visaEndDate?: string;
   cellPhone?: string;
   workPhone?: string;
   emergencyContacts?: {

@@ -1,23 +1,24 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
-import type { RootState } from "../store";
 import type { Employee } from "../types";
-import axios from "axios";
+import api from "../utils/api";
 import NameSection from "../components/sections/NameSection";
 import AddressSection from "../components/sections/AddressSection";
 import ContactInfoSection from "../components/sections/ContactInfoSection";
+import EmploymentSection from "../components/sections/EmploymentSection";
+import EmergencyContactSection from "../components/sections/EmergencyContactSection";
+import DocumentsSection from "../components/sections/DocumentsSection";
 
 const EmployeeInfoPage = () => {
-  // hr
+  // hr: /employees/:id
+  // employee: /personal-info
   const { id } = useParams();
-  const currentEmployee = useSelector(
-    (state: RootState) => state.auth.employee,
-  );
-  const token = useSelector((state: RootState) => state.auth.token);
 
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // placeholder, will need a real api to fetch all documents
+  const documents = [{ name: "", url: "" }];
 
   // there is no id means it is not a hr
   const isOwner = !id;
@@ -28,13 +29,11 @@ const EmployeeInfoPage = () => {
       try {
         if (isOwner) {
           // employee themselves
-          setEmployee(currentEmployee);
+          const res = await api.get(`/api/auth/me`);
+          setEmployee(res.data.employee);
         } else {
           // hr
-          const res = await axios.get(
-            `${import.meta.env.VITE_API_URL}/api/employees/${id}`,
-            { headers: { Authorization: `Bearer ${token}` } },
-          );
+          const res = await api.get(`/api/employees/${id}`);
           setEmployee(res.data.employee);
         }
       } catch (err) {
@@ -44,7 +43,7 @@ const EmployeeInfoPage = () => {
       }
     };
     fetchEmployee();
-  }, [id, token, currentEmployee]);
+  }, [id, isOwner]);
 
   // need a real backend api
   const onUploadPicture = (file: File) => {
@@ -98,6 +97,41 @@ const EmployeeInfoPage = () => {
         }}
         editable={editable}
       />
+
+      <EmploymentSection
+        defaultValues={{
+          visaType: employee.visaType || "",
+          visaTitle: employee.visaTitle || "",
+          visaStartDate: employee.visaStartDate || "",
+          visaEndDate: employee.visaEndDate || "",
+        }}
+        editable={editable}
+      />
+
+      <EmergencyContactSection
+        defaultValues={{
+          emergencyContacts: employee.emergencyContacts?.length
+            ? employee.emergencyContacts.map((c) => ({
+                firstName: c.firstName || "",
+                lastName: c.lastName || "",
+                phone: c.phone || "",
+                email: c.email || "",
+                relationship: c.relationship || "",
+              }))
+            : [
+                {
+                  firstName: "",
+                  lastName: "",
+                  phone: "",
+                  email: "",
+                  relationship: "",
+                },
+              ],
+        }}
+        editable={editable}
+      />
+
+      <DocumentsSection documents={documents} />
     </div>
   );
 };
