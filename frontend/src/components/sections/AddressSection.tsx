@@ -21,16 +21,12 @@ const AddressSection = ({
   editable = true,
 }: AddressSectionProps) => {
   const {
-    isEditing,
-    setIsEditing,
+    headerProps,
     register,
     errors,
-    handleSubmit,
-    onSave,
-    onCancel,
+    disabled,
   } = useEditableSection<AddressFormData>(defaultValues);
 
-  const disabled = !isEditing;
 
   return (
     <div>
@@ -38,10 +34,7 @@ const AddressSection = ({
         <SectionHeader
           title="Address"
           editable={editable}
-          isEditing={isEditing}
-          onEdit={() => setIsEditing(true)}
-          onCancel={onCancel}
-          onSave={handleSubmit(onSave)}
+          {...headerProps}
         />
       </div>
 

@@ -9,6 +9,7 @@ import {
   fetchCurrentEmployee,
 } from "../store/slices/authSlice";
 import type { RootState } from "../store";
+import api from "../utils/api";
 
 const SignInPage = () => {
   const [username, setUsername] = useState("");
@@ -47,10 +48,11 @@ const SignInPage = () => {
     e.preventDefault();
     if (!validate()) return;
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
-        { username, password },
-      );
+    //   const response = await axios.post(
+    //     `${import.meta.env.VITE_API_URL}/api/auth/login`,
+    //     { username, password },
+    //   );
+      const response = await api.post("/api/auth/login",{ username, password })
       dispatch(
         setCredentials({
           token: response.data.token,

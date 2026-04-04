@@ -28,49 +28,23 @@ const NameSection = ({
   onUploadPicture,
 }: NameSectionProps) => {
   const {
-    isEditing,
-    setIsEditing,
+    headerProps,
     register,
     errors,
-    handleSubmit,
-    onSave,
-    onCancel,
+    disabled,
   } = useEditableSection<NameFormData>(defaultValues);
-
-  const disabled = !isEditing;
 
   return (
     <div>
-      {/* <div>
-        <h3>Address</h3>
-        {editable &&
-          (isEditing ? (
-            <div>
-              <button type="button" onClick={onCancel}>
-                Cancel
-              </button>
-              <button type="button" onClick={handleSubmit(onSave)}>
-                Save
-              </button>
-            </div>
-          ) : (
-            <button type="button" onClick={() => setIsEditing(true)}>
-              Edit
-            </button>
-          ))}
-      </div> */}
       <SectionHeader
         title="Address"
         editable={editable}
-        isEditing={isEditing}
-        onEdit={() => setIsEditing(true)}
-        onCancel={onCancel}
-        onSave={handleSubmit(onSave)}
+        {...headerProps}
       />
       <div>
         <label>Profile Picture</label>
         <img src={profilePicture || "default_avatar.png"} alt="avatar" />
-        {isEditing && (
+        {headerProps.isEditing && (
           <input
             type="file"
             accept="image/*"

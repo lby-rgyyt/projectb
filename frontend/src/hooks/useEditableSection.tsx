@@ -14,7 +14,7 @@ const useEditableSection = <T extends FieldValues>(
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<T>({ defaultValues });
   const onSave = async (data: T) => {
     try {
@@ -28,14 +28,27 @@ const useEditableSection = <T extends FieldValues>(
     reset();
     setIsEditing(false);
   };
+  //   return {
+  //     isEditing,
+  //     setIsEditing,
+  //     register,
+  //     errors,
+  //     isSubmitting,
+  //     handleSubmit,
+  //     onSave,
+  //     onCancel,
+  //   };
   return {
-    isEditing,
-    setIsEditing,
+    headerProps: {
+      isEditing,
+      isSubmitting,
+      onCancel,
+      onSave: handleSubmit(onSave),
+      onEdit: () => setIsEditing(true),
+    },
     register,
     errors,
-    handleSubmit,
-    onSave,
-    onCancel,
+    disabled:!isEditing,
   };
 };
 

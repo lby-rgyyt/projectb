@@ -2,6 +2,7 @@ interface SectionHeaderProps {
   title: string;
   editable: boolean;
   isEditing: boolean;
+  isSubmitting:boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
@@ -11,6 +12,7 @@ const SectionHeader = ({
   title,
   editable,
   isEditing,
+  isSubmitting,
   onEdit,
   onCancel,
   onSave,
@@ -23,8 +25,8 @@ const SectionHeader = ({
           <button type="button" onClick={onCancel}>
             Cancel
           </button>
-          <button type="button" onClick={onSave}>
-            Save
+          <button type="button" onClick={onSave} disabled={isSubmitting}>
+            {isSubmitting ? "Saving...":"Save"}
           </button>
         </div>
       ) : (

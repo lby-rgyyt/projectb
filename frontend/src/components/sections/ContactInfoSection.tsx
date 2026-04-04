@@ -15,17 +15,8 @@ const ContactInfoSection = ({
   defaultValues,
   editable = true,
 }: ContactInfoSectionProps) => {
-  const {
-    isEditing,
-    setIsEditing,
-    register,
-    errors,
-    handleSubmit,
-    onSave,
-    onCancel,
-  } = useEditableSection<ContactInfoFormData>(defaultValues);
-
-  const disabled = !isEditing;
+  const { headerProps, register, errors, disabled } =
+    useEditableSection<ContactInfoFormData>(defaultValues);
 
   return (
     <div>
@@ -33,10 +24,7 @@ const ContactInfoSection = ({
         <SectionHeader
           title="Contact Info"
           editable={editable}
-          isEditing={isEditing}
-          onEdit={() => setIsEditing(true)}
-          onCancel={onCancel}
-          onSave={handleSubmit(onSave)}
+          {...headerProps}
         />
       </div>
 
