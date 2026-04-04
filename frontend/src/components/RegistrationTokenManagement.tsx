@@ -4,12 +4,6 @@ import { useForm } from "react-hook-form";
 import api from "../utils/api";
 import axios from "axios";
 
-interface TokenItemProps {
-  email: string;
-  name: string;
-  link: string;
-  status: string;
-}
 interface TokenFormData {
   name: string;
   email: string;
@@ -99,30 +93,18 @@ const RegistrationTokenManagement = () => {
           <tbody>
             {tokens.map((t) => {
               return (
-                <TokenItem
-                  key={t.id}
-                  name={t.name}
-                  email={t.email}
-                  link={t.link}
-                  status={t.status}
-                />
+                <tr key={t.id}>
+                  <td>{t.email}</td>
+                  <td>{t.name}</td>
+                  <td>{t.link}</td>
+                  <td>{t.status}</td>
+                </tr>
               );
             })}
           </tbody>
         </table>
       </div>
     </>
-  );
-};
-
-const TokenItem = ({ email, name, link, status }: TokenItemProps) => {
-  return (
-    <tr>
-      <td>{email}</td>
-      <td>{name}</td>
-      <td>{link}</td>
-      <td>{status}</td>
-    </tr>
   );
 };
 

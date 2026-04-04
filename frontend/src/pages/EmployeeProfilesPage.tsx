@@ -4,15 +4,6 @@ import api from "../utils/api";
 import axios from "axios";
 import type { Employee } from "../types";
 
-interface EmployeeItemPrors {
-  id: string;
-  name: string;
-  SSN: string;
-  workAuth: string;
-  phone: string;
-  email: string;
-}
-
 const EmployeeProfiles = () => {
   const [name, setName] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -63,48 +54,27 @@ const EmployeeProfiles = () => {
           <tbody>
             {employees.map((employee) => {
               return (
-                <EmployeeItem
-                  key={employee.id}
-                  id={employee.id}
-                  name={`${employee.lastName || ""}, ${employee.firstName || ""}`}
-                  SSN={maskSSN(employee.ssn || "")}
-                  workAuth={
-                    employee.visaType
+                <tr key={employee.id}>
+                  <td>
+                    <Link to={`/employees/${employee.id}`} target="_blank">
+                      {`${employee.lastName || ""}, ${employee.firstName || ""}`}
+                    </Link>
+                  </td>
+                  <td>{maskSSN(employee.ssn || "")}</td>
+                  <td>
+                    {employee.visaType
                       ? employee.visaType
-                      : employee.visaTitle || ""
-                  }
-                  phone={employee.cellPhone || "N/A"}
-                  email={employee.email}
-                />
+                      : employee.visaTitle || ""}
+                  </td>
+                  <td>{employee.cellPhone || "N/A"}</td>
+                  <td>{employee.email}</td>
+                </tr>
               );
             })}
           </tbody>
         </table>
       </div>
     </>
-  );
-};
-
-const EmployeeItem = ({
-  id,
-  name,
-  SSN,
-  workAuth,
-  phone,
-  email,
-}: EmployeeItemPrors) => {
-  return (
-    <tr>
-      <td>
-        <Link to={`/employees/${id}`} target="_blank">
-          {name}
-        </Link>
-      </td>
-      <td>{SSN}</td>
-      <td>{workAuth}</td>
-      <td>{phone}</td>
-      <td>{email}</td>
-    </tr>
   );
 };
 
