@@ -82,6 +82,7 @@ export const updateEmployeeInfo = async (
       "address",
       "cellPhone",
       "workPhone",
+      "reference",
       "emergencyContacts",
     ];
     const updates: Record<string, any> = {};

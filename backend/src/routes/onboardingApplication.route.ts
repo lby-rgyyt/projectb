@@ -3,6 +3,8 @@ import {
   getAllOnboardingApplications,
   getOnboardingApplicationByEmployeeId,
   getMyOnboardingApplication,
+  createOnboardingApplication,
+  updateOnboardingApplication,
 } from "../controllers/onboardingApplication.controller.js";
 import { authentication, authorize } from "../middleware/auth.middleware.js";
 
@@ -21,5 +23,9 @@ router.get(
   authorize("hr"),
   getOnboardingApplicationByEmployeeId,
 );
+
+router.post("/create", authentication, createOnboardingApplication);
+
+router.put("/:id", authentication, updateOnboardingApplication);
 
 export default router;

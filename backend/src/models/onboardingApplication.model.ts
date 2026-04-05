@@ -2,7 +2,7 @@ import mongoose, { Schema, Types, Document } from "mongoose";
 
 interface IOnboardingApplication extends Document {
   employeeId: Types.ObjectId;
-  status: "pending" | "approved" | "rejected";
+  status:"pending" | "approved" | "rejected";
   feedback?: string;
   documents?: Map<string, Types.ObjectId>;
   createdAt: Date;
@@ -21,7 +21,7 @@ const onboardingApplicationSchema = new Schema<IOnboardingApplication>(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
-    feedback: String,
+    feedback: { type: String, default: "" },
     documents: {
       type: Map,
       of: { type: Schema.Types.ObjectId, ref: "Document" },

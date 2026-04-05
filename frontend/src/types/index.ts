@@ -7,6 +7,15 @@ export interface OnboardingApplication {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Contact {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  relationship?: string;
+}
+
 export interface Employee {
   id: string;
   username: string;
@@ -33,13 +42,15 @@ export interface Employee {
   visaEndDate?: string;
   cellPhone?: string;
   workPhone?: string;
-  emergencyContacts?: {
+  reference?: {
     firstName?: string;
     lastName?: string;
+    middleName?:string;
     phone?: string;
     email?: string;
     relationship?: string;
-  }[];
+  };
+  emergencyContacts?: Contact[];
   onboardingApplication: OnboardingApplication | null;
 }
 

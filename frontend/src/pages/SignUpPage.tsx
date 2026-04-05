@@ -32,11 +32,13 @@ const SignUpPage = () => {
 
   const checkToken = async () => {
     try {
-    //   await axios.get(
-    //     `${import.meta.env.VITE_API_URL}/api/registration-tokens/check`,
-    //     { params: { token: registrationToken } },
-    //   );
-      await api.get("/api/registration-tokens/check",{ params: { token: registrationToken } })
+      //   await axios.get(
+      //     `${import.meta.env.VITE_API_URL}/api/registration-tokens/check`,
+      //     { params: { token: registrationToken } },
+      //   );
+      await api.get("/api/registration-tokens/check", {
+        params: { token: registrationToken },
+      });
       setTokenValid(true);
     } catch (error) {
       setTokenValid(false);
@@ -59,6 +61,7 @@ const SignUpPage = () => {
       checkToken();
     };
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const validate = () => {
@@ -90,21 +93,21 @@ const SignUpPage = () => {
     e.preventDefault();
     if (!validate()) return;
     try {
-    //   const response = await axios.post(
-    //     `${import.meta.env.VITE_API_URL}/api/auth/register`,
-    //     {
-    //       username,
-    //       email,
-    //       password,
-    //       registrationToken
-    //     },
-    //   );
-      const response = await api.post("/api/auth/register",{
+      //   const response = await axios.post(
+      //     `${import.meta.env.VITE_API_URL}/api/auth/register`,
+      //     {
+      //       username,
+      //       email,
+      //       password,
+      //       registrationToken
+      //     },
+      //   );
+      const response = await api.post("/api/auth/register", {
         username,
         email,
         password,
-        registrationToken
-      })
+        registrationToken,
+      });
       dispatch(
         setCredentials({
           token: response.data.token,

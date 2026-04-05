@@ -27,6 +27,7 @@ const SignInPage = () => {
     if (token) {
       dispatch(fetchCurrentEmployee());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const validate = () => {
@@ -48,11 +49,14 @@ const SignInPage = () => {
     e.preventDefault();
     if (!validate()) return;
     try {
-    //   const response = await axios.post(
-    //     `${import.meta.env.VITE_API_URL}/api/auth/login`,
-    //     { username, password },
-    //   );
-      const response = await api.post("/api/auth/login",{ username, password })
+      //   const response = await axios.post(
+      //     `${import.meta.env.VITE_API_URL}/api/auth/login`,
+      //     { username, password },
+      //   );
+      const response = await api.post("/api/auth/login", {
+        username,
+        password,
+      });
       dispatch(
         setCredentials({
           token: response.data.token,
