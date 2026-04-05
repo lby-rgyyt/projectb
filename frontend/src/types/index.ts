@@ -1,6 +1,6 @@
 export interface OnboardingApplication {
   id: string;
-  employeeId: string;
+  employeeId: string | Employee;
   status: "pending" | "approved" | "rejected";
   feedback?: string;
   documents?: Record<string, string>;
@@ -36,8 +36,8 @@ export interface Employee {
     state?: string;
     zip?: string;
   };
-  visaType?:string;
-  visaTitle?:string;
+  visaType?: string;
+  visaTitle?: string;
   visaStartDate?: string;
   visaEndDate?: string;
   cellPhone?: string;
@@ -45,7 +45,7 @@ export interface Employee {
   reference?: {
     firstName?: string;
     lastName?: string;
-    middleName?:string;
+    middleName?: string;
     phone?: string;
     email?: string;
     relationship?: string;
@@ -55,11 +55,11 @@ export interface Employee {
 }
 
 export interface RegistrationToken {
-  id:string;
-  email:string;
-  name:string;
-  token:string;
-  link:string;
+  id: string;
+  email: string;
+  name: string;
+  token: string;
+  link: string;
   status: "pending" | "registered" | "expired";
 }
 

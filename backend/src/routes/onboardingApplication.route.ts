@@ -18,7 +18,7 @@ router.get(
 );
 router.get("/my-application", authentication, getMyOnboardingApplication);
 router.get(
-  "/:id",
+  "/employee/:id",
   authentication,
   authorize("hr"),
   getOnboardingApplicationByEmployeeId,

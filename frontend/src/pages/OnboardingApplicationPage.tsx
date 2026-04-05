@@ -4,8 +4,9 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 import api from "../utils/api";
 import type { OnboardingApplication, Contact } from "../types";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import axios from "axios";
+import OnboardingStatusBanner from "../components/OnboardingStatusBanner";
 
 interface OnboardingApplicationFormData {
   firstName: string;
@@ -185,7 +186,9 @@ const OnboardingApplicationPage = () => {
           }
         } else {
           // hr
-          const res = await api.get(`/api/onboarding-applications/${id}`);
+          const res = await api.get(
+            `/api/onboarding-applications/employee/${id}`,
+          );
           const app = res.data.onboardingApplication;
           // set status data
           setApplicationData(app);
@@ -259,6 +262,30 @@ const OnboardingApplicationPage = () => {
     isOwner && (!applicationData || applicationData.status === "rejected");
   const disabled = !canEdit;
 
+  const handleApprove = async () => {
+    if (!applicationData) return;
+    try {
+      await api.put(`/api/onboarding-applications/${applicationData.id}`, {
+        status: "approved",
+      });
+      setApplicationData({ ...applicationData, status: "approved" });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const handleReject = async (feedback: string) => {
+    if (!applicationData) return;
+    try {
+      await api.put(`/api/onboarding-applications/${applicationData.id}`, {
+        status: "rejected",
+        feedback,
+      });
+      setApplicationData({ ...applicationData, status: "rejected", feedback });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const onSubmit = async (data: OnboardingApplicationFormData) => {
     try {
       // update employee info
@@ -291,6 +318,9 @@ const OnboardingApplicationPage = () => {
   };
 
   if (loading) return <p>Loading...</p>;
+  if (isOwner && applicationData?.status === "approved") {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div>
@@ -298,6 +328,13 @@ const OnboardingApplicationPage = () => {
       {isOwner && (
         <p>Complete all required fields to submit your application</p>
       )}
+
+      <OnboardingStatusBanner
+        applicationData={applicationData}
+        isOwner={isOwner}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         {/*Personal Information*/}

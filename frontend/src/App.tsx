@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
-import HRRoute from "./routes/HRRoutes";
+import HRRoute from "./routes/HRRoute";
 
 import MainLayout from "./layouts/MainLayout";
 import SignInPage from "./pages/SignInPage";
@@ -24,12 +24,16 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route
-              path="/onboardingApplication"
+              path="/onboarding-application"
               element={<OnboardingApplicationPage />}
             />
             <Route path="/personal-info" element={<EmployeeInfoPage />} />
 
             <Route element={<HRRoute />}>
+              <Route
+                path="/employees/onboarding-application/:id"
+                element={<OnboardingApplicationPage />}
+              />
               <Route path="/employees/:id" element={<EmployeeInfoPage />} />
             </Route>
 
