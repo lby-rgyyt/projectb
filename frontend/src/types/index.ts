@@ -1,3 +1,13 @@
+export interface VisaStatus {
+  id: string;
+  employeeId: string | Employee;
+  currentStep: "optReceipt" | "optEAD" | "i983" | "i20" | "completed";
+  currentStatus: "pendingSubmit" | "pendingApprove" | "approved" | "rejected";
+  feedback?: string;
+  inProgress: boolean;
+  documents?: Record<string, string>;
+}
+
 export interface OnboardingApplication {
   id: string;
   employeeId: string | Employee;

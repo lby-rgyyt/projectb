@@ -3,7 +3,7 @@ import mongoose, { Schema, Types, Document } from "mongoose";
 interface IVisaStatus extends Document {
   employeeId: Types.ObjectId;
   currentStep: "optReceipt" | "optEAD" | "i983" | "i20" | "completed";
-  currentStatus: "pending" | "approved" | "rejected";
+  currentStatus: "pendingSubmit" | "pendingApprove" | "approved" | "rejected";
   feedback?: string;
   documents?: Map<string, Types.ObjectId>;
   inProgress: boolean;
@@ -25,8 +25,8 @@ const visaStatusSchema = new Schema<IVisaStatus>(
     },
     currentStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      enum: ["pendingSubmit","pendingApprove", "approved", "rejected"],
+      default: "pendingSubmit",
     },
     feedback: String,
     documents: {

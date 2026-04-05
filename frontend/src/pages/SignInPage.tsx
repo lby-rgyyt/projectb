@@ -1,14 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { SubmitEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../store";
 import {
   setCredentials,
-  fetchCurrentEmployee,
 } from "../store/slices/authSlice";
-import type { RootState } from "../store";
 import api from "../utils/api";
 
 const SignInPage = () => {
@@ -20,15 +18,6 @@ const SignInPage = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-
-  const token = useSelector((state: RootState) => state.auth.token);
-
-  useEffect(() => {
-    if (token) {
-      dispatch(fetchCurrentEmployee());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const validate = () => {
     let valid = true;

@@ -32,10 +32,10 @@ export const getAllVisaStatus = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const applications = await VisaStatus.find();
+    const visaStatuses = await VisaStatus.find().populate("employeeId");
     res.status(200).json({
       success: true,
-      applications: applications,
+      visaStatuses: visaStatuses,
     });
   } catch (err) {
     next(err);
@@ -48,10 +48,56 @@ export const getInProgressVisaStatus = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const applications = await VisaStatus.find({ inProgress: true });
+    const visaStatuses = await VisaStatus.find({ inProgress: true }).populate("emplyeeId");
     res.status(200).json({
       success: true,
-      applications: applications,
+      visaStatuses: visaStatuses,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateVisaStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res
+        .status(400)
+        .json({ success: false, message: "Visa status ID is required" });
+      return;
+    }
+
+    const { cueerntStatus, feedback } = req.body;
+    const updates: Record<string, string> = {};
+
+    if (cueerntStatus) updates.cueerntStatus = cueerntStatus;
+
+    // only hr can update feedback
+    if (feedback !== undefined && req.employee?.role === "hr") {
+      updates.feedback = feedback;
+    }
+
+    const visaStatus = await VisaStatus.findByIdAndUpdate(
+      id,
+      { $set: { updates } },
+      { new: true },
+    );
+
+    if (!visaStatus) {
+      res
+        .status(404)
+        .json({ success: false, message: "Visa status not found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      visaStatus: visaStatus,
     });
   } catch (err) {
     next(err);
