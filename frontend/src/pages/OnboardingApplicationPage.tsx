@@ -25,6 +25,7 @@ interface OnboardingApplicationFormData {
     state: string;
     zip: string;
   };
+  isUnlimited: "yes" | "no" | "";
   visaType: string;
   visaTitle?: string;
   visaStartDate?: string;
@@ -66,6 +67,7 @@ const OnboardingApplicationPage = () => {
     handleSubmit,
     watch,
     reset,
+    setValue,
     control,
     formState: { errors, isSubmitting },
   } = useForm<OnboardingApplicationFormData>({
@@ -80,6 +82,7 @@ const OnboardingApplicationPage = () => {
       dateOfBirth: "",
       gender: "",
       address: { building: "", streetName: "", city: "", state: "", zip: "" },
+      isUnlimited: "",
       visaType: "",
       visaTitle: "",
       visaStartDate: "",
@@ -102,6 +105,7 @@ const OnboardingApplicationPage = () => {
     control,
     name: "emergencyContacts",
   });
+  const isUnlimited = watch("isUnlimited");
   const visaType = watch("visaType");
 
   useEffect(() => {
@@ -138,6 +142,12 @@ const OnboardingApplicationPage = () => {
                 state: emp.address?.state || "",
                 zip: emp.address?.zip || "",
               },
+              isUnlimited:
+                emp.visaType === "Citizen" || emp.visaType === "Green Card"
+                  ? "yes"
+                  : emp.visaType
+                    ? "no"
+                    : "",
               visaType: emp.visaType || "",
               visaTitle: emp.visaTitle || "",
               visaStartDate: emp.visaStartDate || "",
@@ -199,6 +209,12 @@ const OnboardingApplicationPage = () => {
               state: emp.address?.state || "",
               zip: emp.address?.zip || "",
             },
+            isUnlimited:
+              emp.visaType === "Citizen" || emp.visaType === "Green Card"
+                ? "yes"
+                : emp.visaType
+                  ? "no"
+                  : "",
             visaType: emp.visaType || "",
             visaTitle: emp.visaTitle || "",
             visaStartDate: emp.visaStartDate || "",
@@ -262,7 +278,6 @@ const OnboardingApplicationPage = () => {
       // re-fetch data to reload page
       const res = await api.get("/api/onboarding-applications/my-application");
       setApplicationData(res.data.onboardingApplication);
-
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         alert(error.response.data.message || "Submission failed");
@@ -286,316 +301,460 @@ const OnboardingApplicationPage = () => {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         {/*Personal Information*/}
-        <h3>Personal Information</h3>
-
         <div>
-          <label>First Name *</label>
-          <input
-            {...register("firstName", { required: "First name is required." })}
-            disabled={disabled}
-          />
-          {errors.firstName && <span>{errors.firstName.message}</span>}
-        </div>
+          <h3>Personal Information</h3>
 
-        <div>
-          <label>Last Name *</label>
-          <input
-            {...register("lastName", { required: "Last name is required." })}
-            disabled={disabled}
-          />
-          {errors.lastName && <span>{errors.lastName.message}</span>}
-        </div>
-
-        <div>
-          <label>Middle Name</label>
-          <input {...register("middleName")} disabled={disabled} />
-        </div>
-
-        <div>
-          <label>Preferred Name</label>
-          <input {...register("preferredName")} disabled={disabled} />
-        </div>
-
-        <div>
-          <label>Profile Picture</label>
-          <img src={"placeholder"} alt="avatar" />
-          {canEdit && (
+          <div>
+            <label>First Name *</label>
             <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadPic(file);
-              }}
+              {...register("firstName", {
+                required: "First name is required.",
+              })}
+              disabled={disabled}
             />
-          )}
-        </div>
+            {errors.firstName && <span>{errors.firstName.message}</span>}
+          </div>
 
-        <div>
-          <label>Email</label>
-          <input value={email} disabled />
-        </div>
+          <div>
+            <label>Last Name *</label>
+            <input
+              {...register("lastName", { required: "Last name is required." })}
+              disabled={disabled}
+            />
+            {errors.lastName && <span>{errors.lastName.message}</span>}
+          </div>
 
-        <div>
-          <label>Cell Phone *</label>
-          <input
-            {...register("cellPhone", { required: "Cell phone is required." })}
-            disabled={disabled}
-          />
-          {errors.cellPhone && <span>{errors.cellPhone.message}</span>}
-        </div>
+          <div>
+            <label>Middle Name</label>
+            <input {...register("middleName")} disabled={disabled} />
+          </div>
 
-        <div>
-          <label>Work Phone</label>
-          <input {...register("workPhone")} disabled={disabled} />
-        </div>
+          <div>
+            <label>Preferred Name</label>
+            <input {...register("preferredName")} disabled={disabled} />
+          </div>
 
-        <div>
-          <label>SSN *</label>
-          <input
-            {...register("ssn", { required: "SSN is required." })}
-            disabled={disabled}
-          />
-          {errors.ssn && <span>{errors.ssn.message}</span>}
-        </div>
+          <div>
+            <label>Profile Picture</label>
+            <img src={"placeholder"} alt="avatar" />
+            {canEdit && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadPic(file);
+                }}
+              />
+            )}
+          </div>
 
-        <div>
-          <label>Date of Birth *</label>
-          <input
-            type="date"
-            {...register("dateOfBirth", {
-              required: "Date of birth is required.",
-            })}
-            disabled={disabled}
-          />
-          {errors.dateOfBirth && <span>{errors.dateOfBirth.message}</span>}
-        </div>
+          <div>
+            <label>Email</label>
+            <input value={email} disabled />
+          </div>
 
-        <div>
-          <label>Gender *</label>
-          <select
-            {...register("gender", { required: "Gender is required." })}
-            disabled={disabled}
-          >
-            <option value="">Select...</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="I do not wish to answer">
-              I do not wish to answer
-            </option>
-          </select>
-          {errors.gender && <span>{errors.gender.message}</span>}
+          <div>
+            <label>Cell Phone *</label>
+            <input
+              {...register("cellPhone", {
+                required: "Cell phone is required.",
+              })}
+              disabled={disabled}
+            />
+            {errors.cellPhone && <span>{errors.cellPhone.message}</span>}
+          </div>
+
+          <div>
+            <label>Work Phone</label>
+            <input {...register("workPhone")} disabled={disabled} />
+          </div>
+
+          <div>
+            <label>SSN *</label>
+            <input
+              {...register("ssn", { required: "SSN is required." })}
+              disabled={disabled}
+            />
+            {errors.ssn && <span>{errors.ssn.message}</span>}
+          </div>
+
+          <div>
+            <label>Date of Birth *</label>
+            <input
+              type="date"
+              {...register("dateOfBirth", {
+                required: "Date of birth is required.",
+              })}
+              disabled={disabled}
+            />
+            {errors.dateOfBirth && <span>{errors.dateOfBirth.message}</span>}
+          </div>
+
+          <div>
+            <label>Gender *</label>
+            <select
+              {...register("gender", { required: "Gender is required." })}
+              disabled={disabled}
+            >
+              <option value="">Select...</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="I do not wish to answer">
+                I do not wish to answer
+              </option>
+            </select>
+            {errors.gender && <span>{errors.gender.message}</span>}
+          </div>
         </div>
 
         {/*Address*/}
-        <h3>Address</h3>
-
         <div>
-          <label>Building/Apt #</label>
-          <input {...register("address.building")} disabled={disabled} />
-        </div>
+          <h3>Address</h3>
 
-        <div>
-          <label>Street Name *</label>
-          <input
-            {...register("address.streetName", {
-              required: "Street name is required.",
-            })}
-            disabled={disabled}
-          />
-          {errors.address?.streetName && (
-            <span>{errors.address.streetName.message}</span>
-          )}
-        </div>
+          <div>
+            <label>Building/Apt #</label>
+            <input {...register("address.building")} disabled={disabled} />
+          </div>
 
-        <div>
-          <label>City *</label>
-          <input
-            {...register("address.city", { required: "City is required." })}
-            disabled={disabled}
-          />
-          {errors.address?.city && <span>{errors.address.city.message}</span>}
-        </div>
+          <div>
+            <label>Street Name *</label>
+            <input
+              {...register("address.streetName", {
+                required: "Street name is required.",
+              })}
+              disabled={disabled}
+            />
+            {errors.address?.streetName && (
+              <span>{errors.address.streetName.message}</span>
+            )}
+          </div>
 
-        <div>
-          <label>State *</label>
-          <input
-            {...register("address.state", { required: "State is required." })}
-            disabled={disabled}
-          />
-          {errors.address?.state && <span>{errors.address.state.message}</span>}
-        </div>
+          <div>
+            <label>City *</label>
+            <input
+              {...register("address.city", { required: "City is required." })}
+              disabled={disabled}
+            />
+            {errors.address?.city && <span>{errors.address.city.message}</span>}
+          </div>
 
-        <div>
-          <label>Zip *</label>
-          <input
-            {...register("address.zip", { required: "Zip is required." })}
-            disabled={disabled}
-          />
-          {errors.address?.zip && <span>{errors.address.zip.message}</span>}
+          <div>
+            <label>State *</label>
+            <input
+              {...register("address.state", { required: "State is required." })}
+              disabled={disabled}
+            />
+            {errors.address?.state && (
+              <span>{errors.address.state.message}</span>
+            )}
+          </div>
+
+          <div>
+            <label>Zip *</label>
+            <input
+              {...register("address.zip", { required: "Zip is required." })}
+              disabled={disabled}
+            />
+            {errors.address?.zip && <span>{errors.address.zip.message}</span>}
+          </div>
         </div>
 
         {/*Citizenship / Work Authorization*/}
-        <h3>Citizenship / Work Authorization</h3>
+        <div>
+          <h3>Citizenship / Work Authorization</h3>
+          <div>
+            <label>Permanent resident or citizen of the U.S.? *</label>
+            <input
+              type="hidden"
+              {...register("isUnlimited", {
+                required: "This field is required.",
+              })}
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                setValue("isUnlimited", "yes");
+                setValue("visaType", "");
+                setValue("visaTitle", "");
+                setValue("visaStartDate", "");
+                setValue("visaEndDate", "");
+              }}
+              disabled={disabled}
+            >
+              Yes
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setValue("isUnlimited", "no");
+                setValue("visaType", "");
+              }}
+              disabled={disabled}
+            >
+              No
+            </button>
+
+            {errors.isUnlimited && <span>{errors.isUnlimited.message}</span>}
+          </div>
+          {/* option 1 */}
+          {isUnlimited === "yes" && (
+            <div>
+              <label>Status *</label>
+              <select
+                {...register("visaType", {
+                  required: "Work authorization is required.",
+                })}
+                disabled={disabled}
+              >
+                <option value="">Select...</option>
+                <option value="Green Card">Green Card</option>
+                <option value="Citizen">Citizen</option>
+              </select>
+              {errors.visaType && <span>{errors.visaType.message}</span>}
+            </div>
+          )}
+          {isUnlimited === "no" && (
+            <div>
+              <label>Work Authorization Type *</label>
+              <select
+                {...register("visaType", {
+                  required: "Work authorization is required.",
+                })}
+                disabled={disabled}
+              >
+                <option value="">Select...</option>
+                <option value="H1-B">H1-B</option>
+                <option value="L2">L2</option>
+                <option value="F1(CPT/OPT)">F1(CPT/OPT)</option>
+                <option value="H4">H4</option>
+                <option value="Other">Other</option>
+              </select>
+              {errors.visaType && <span>{errors.visaType.message}</span>}
+            </div>
+          )}
+          {/* placeholder: F1 employees need to upload file */}
+          {visaType === "F1(CPT/OPT)" && (
+            <div>
+              <label>F1(CPT/OPT) — Upload OPT Receipt</label>
+            </div>
+          )}
+
+          {/* custom title */}
+          {visaType === "Other" && (
+            <div>
+              <label>Visa Title *</label>
+              <input
+                {...register("visaTitle", {
+                  required: "Visa title is required.",
+                })}
+                disabled={disabled}
+              />
+              {errors.visaTitle && <span>{errors.visaTitle.message}</span>}
+            </div>
+          )}
+
+          {/* visa date */}
+          {isUnlimited === "no" && (
+            <div>
+              <div>
+                <label>Start Date *</label>
+                <input
+                  type="date"
+                  {...register("visaStartDate", {
+                    required: "Visa start date is required.",
+                  })}
+                  disabled={disabled}
+                />
+                {errors.visaStartDate && (
+                  <span>{errors.visaStartDate.message}</span>
+                )}
+              </div>
+              <div>
+                <label>End Date *</label>
+                <input
+                  type="date"
+                  {...register("visaEndDate", {
+                    required: "Visa end date is required.",
+                  })}
+                  disabled={disabled}
+                />
+                {errors.visaEndDate && (
+                  <span>{errors.visaEndDate.message}</span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/*Reference*/}
-        <h3>Reference</h3>
-
         <div>
-          <label>First Name *</label>
-          <input
-            {...register("reference.firstName", {
-              required: "First name is required.",
-            })}
-            disabled={disabled}
-          />
-          {errors.reference?.firstName && (
-            <span>{errors.reference.firstName.message}</span>
-          )}
-        </div>
+          <h3>Reference</h3>
 
-        <div>
-          <label>Last Name *</label>
-          <input
-            {...register("reference.lastName", {
-              required: "Last name is required.",
-            })}
-            disabled={disabled}
-          />
-          {errors.reference?.lastName && (
-            <span>{errors.reference.lastName.message}</span>
-          )}
-        </div>
+          <div>
+            <label>First Name *</label>
+            <input
+              {...register("reference.firstName", {
+                required: "First name is required.",
+              })}
+              disabled={disabled}
+            />
+            {errors.reference?.firstName && (
+              <span>{errors.reference.firstName.message}</span>
+            )}
+          </div>
 
-        <div>
-          <label>Middle Name</label>
-          <input {...register("reference.middleName")} disabled={disabled} />
-        </div>
+          <div>
+            <label>Last Name *</label>
+            <input
+              {...register("reference.lastName", {
+                required: "Last name is required.",
+              })}
+              disabled={disabled}
+            />
+            {errors.reference?.lastName && (
+              <span>{errors.reference.lastName.message}</span>
+            )}
+          </div>
 
-        <div>
-          <label>Phone</label>
-          <input {...register("reference.phone")} disabled={disabled} />
-        </div>
+          <div>
+            <label>Middle Name</label>
+            <input {...register("reference.middleName")} disabled={disabled} />
+          </div>
 
-        <div>
-          <label>Email</label>
-          <input {...register("reference.email")} disabled={disabled} />
-        </div>
+          <div>
+            <label>Phone</label>
+            <input {...register("reference.phone")} disabled={disabled} />
+          </div>
 
-        <div>
-          <label>Relationship *</label>
-          <input
-            {...register("reference.relationship", {
-              required: "Relationship is required.",
-            })}
-            disabled={disabled}
-          />
-          {errors.reference?.relationship && (
-            <span>{errors.reference.relationship.message}</span>
-          )}
+          <div>
+            <label>Email</label>
+            <input {...register("reference.email")} disabled={disabled} />
+          </div>
+
+          <div>
+            <label>Relationship *</label>
+            <input
+              {...register("reference.relationship", {
+                required: "Relationship is required.",
+              })}
+              disabled={disabled}
+            />
+            {errors.reference?.relationship && (
+              <span>{errors.reference.relationship.message}</span>
+            )}
+          </div>
         </div>
 
         {/*Emergency Contacts*/}
-        <h3>Emergency Contact(s)</h3>
+        <div>
+          <h3>Emergency Contact(s)</h3>
 
-        {fields.map((field, index) => (
-          <div
-            key={field.id}
-            style={{
-              marginBottom: 16,
-              padding: 16,
-              border: "1px solid #ccc",
-              borderRadius: 8,
-            }}
-          >
-            <p>Emergency Contact #{index + 1}</p>
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              style={{
+                marginBottom: 16,
+                padding: 16,
+                border: "1px solid #ccc",
+                borderRadius: 8,
+              }}
+            >
+              <p>Emergency Contact #{index + 1}</p>
 
-            <div>
-              <label>First Name *</label>
-              <input
-                {...register(`emergencyContacts.${index}.firstName`, {
-                  required: "First name is required.",
-                })}
-                disabled={disabled}
-              />
-              {errors.emergencyContacts?.[index]?.firstName && (
-                <span>{errors.emergencyContacts[index].firstName.message}</span>
+              <div>
+                <label>First Name *</label>
+                <input
+                  {...register(`emergencyContacts.${index}.firstName`, {
+                    required: "First name is required.",
+                  })}
+                  disabled={disabled}
+                />
+                {errors.emergencyContacts?.[index]?.firstName && (
+                  <span>
+                    {errors.emergencyContacts[index].firstName.message}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label>Last Name *</label>
+                <input
+                  {...register(`emergencyContacts.${index}.lastName`, {
+                    required: "Last name is required.",
+                  })}
+                  disabled={disabled}
+                />
+                {errors.emergencyContacts?.[index]?.lastName && (
+                  <span>
+                    {errors.emergencyContacts[index].lastName.message}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label>Phone *</label>
+                <input
+                  {...register(`emergencyContacts.${index}.phone`, {
+                    required: "Phone is required.",
+                  })}
+                  disabled={disabled}
+                />
+                {errors.emergencyContacts?.[index]?.phone && (
+                  <span>{errors.emergencyContacts[index].phone.message}</span>
+                )}
+              </div>
+
+              <div>
+                <label>Email</label>
+                <input
+                  {...register(`emergencyContacts.${index}.email`)}
+                  disabled={disabled}
+                />
+              </div>
+
+              <div>
+                <label>Relationship *</label>
+                <input
+                  {...register(`emergencyContacts.${index}.relationship`, {
+                    required: "Relationship is required.",
+                  })}
+                  disabled={disabled}
+                />
+                {errors.emergencyContacts?.[index]?.relationship && (
+                  <span>
+                    {errors.emergencyContacts[index].relationship.message}
+                  </span>
+                )}
+              </div>
+
+              {fields.length > 1 && !disabled && (
+                <button type="button" onClick={() => remove(index)}>
+                  Remove
+                </button>
               )}
             </div>
+          ))}
 
-            <div>
-              <label>Last Name *</label>
-              <input
-                {...register(`emergencyContacts.${index}.lastName`, {
-                  required: "Last name is required.",
-                })}
-                disabled={disabled}
-              />
-              {errors.emergencyContacts?.[index]?.lastName && (
-                <span>{errors.emergencyContacts[index].lastName.message}</span>
-              )}
-            </div>
-
-            <div>
-              <label>Phone *</label>
-              <input
-                {...register(`emergencyContacts.${index}.phone`, {
-                  required: "Phone is required.",
-                })}
-                disabled={disabled}
-              />
-              {errors.emergencyContacts?.[index]?.phone && (
-                <span>{errors.emergencyContacts[index].phone.message}</span>
-              )}
-            </div>
-
-            <div>
-              <label>Email</label>
-              <input
-                {...register(`emergencyContacts.${index}.email`)}
-                disabled={disabled}
-              />
-            </div>
-
-            <div>
-              <label>Relationship *</label>
-              <input
-                {...register(`emergencyContacts.${index}.relationship`, {
-                  required: "Relationship is required.",
-                })}
-                disabled={disabled}
-              />
-              {errors.emergencyContacts?.[index]?.relationship && (
-                <span>
-                  {errors.emergencyContacts[index].relationship.message}
-                </span>
-              )}
-            </div>
-
-            {fields.length > 1 && !disabled && (
-              <button type="button" onClick={() => remove(index)}>
-                Remove
-              </button>
-            )}
-          </div>
-        ))}
-
-        {!disabled && (
-          <button
-            type="button"
-            onClick={() =>
-              append({
-                firstName: "",
-                lastName: "",
-                phone: "",
-                email: "",
-                relationship: "",
-              })
-            }
-          >
-            + Add Another Emergency Contact
-          </button>
-        )}
+          {!disabled && (
+            <button
+              type="button"
+              onClick={() =>
+                append({
+                  firstName: "",
+                  lastName: "",
+                  phone: "",
+                  email: "",
+                  relationship: "",
+                })
+              }
+            >
+              + Add Another Emergency Contact
+            </button>
+          )}
+        </div>
 
         {/*Submit*/}
         {canEdit && (
