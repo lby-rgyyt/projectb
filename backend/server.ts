@@ -8,6 +8,7 @@ import employeeRouter from "./src/routes/employee.route.js"
 import registrationTokenRouter from "./src/routes/registrationToken.route.js"
 import onboardingApplicationRouter from "./src/routes/registrationToken.route.js"
 import visaStatusRouter from "./src/routes/visaStatus.route.js"
+import documentRouter from "./src/routes/document.route.js"
 
 
 import cors from "cors";
@@ -23,7 +24,7 @@ app.use(
   }),
 );
 
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
 app.use(express.json());
 app.use("/api/auth", authRouter);
@@ -31,6 +32,7 @@ app.use("/api/employees", employeeRouter);
 app.use("/api/registration-tokens", registrationTokenRouter);
 app.use("/api/onboarding-applications", onboardingApplicationRouter);
 app.use("/api/visa-status", visaStatusRouter);
+app.use("/api/documents",documentRouter);
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err);
