@@ -18,7 +18,7 @@ interface IContact {
   relationship?: string;
 }
 
-interface IEmployee extends Document {
+export interface IEmployee extends Document {
   username: string;
   email: string;
   password: string;

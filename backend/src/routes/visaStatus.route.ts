@@ -2,7 +2,8 @@ import { Router } from "express";
 import {
   getAllVisaStatus,
   getInProgressVisaStatus,
-  getMyVisaStatus
+  getMyVisaStatus,
+  approveCurrentStep
 } from "../controllers/visaStatus.controller.js";
 import { authentication, authorize } from "../middleware/auth.middleware.js";
 
@@ -16,5 +17,7 @@ router.get(
   authorize("hr"),
   getInProgressVisaStatus,
 );
+
+router.put("/approve/:id", authentication, authorize("hr"), approveCurrentStep);
 
 export default router;
