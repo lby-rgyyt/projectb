@@ -3,7 +3,10 @@ import {
   getAllVisaStatus,
   getInProgressVisaStatus,
   getMyVisaStatus,
-  approveCurrentStep
+  approveCurrentStep,
+  createVisaStatus,
+  sendNotificationEmail,
+  updateVisaStatus,
 } from "../controllers/visaStatus.controller.js";
 import { authentication, authorize } from "../middleware/auth.middleware.js";
 
@@ -19,5 +22,14 @@ router.get(
 );
 
 router.put("/approve/:id", authentication, authorize("hr"), approveCurrentStep);
+router.put("/:id", authentication, authorize("hr"), updateVisaStatus);
+
+router.post("/create", authentication, createVisaStatus);
+router.post(
+  "/notify/:id",
+  authentication,
+  authorize("hr"),
+  sendNotificationEmail,
+);
 
 export default router;

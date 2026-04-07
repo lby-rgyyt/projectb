@@ -17,9 +17,6 @@ const EmployeeInfoPage = () => {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // placeholder, will need a real api to fetch all documents
-  const documents = [{ name: "", url: "" }];
-
   // there is no id means it is not a hr
   const isOwner = !id;
   const editable = isOwner;
@@ -45,9 +42,19 @@ const EmployeeInfoPage = () => {
     fetchEmployee();
   }, [id, isOwner]);
 
-  // need a real backend api
-  const onUploadPicture = (file: File) => {
-    console.log(file);
+  const onUploadPicture = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await api.put("/api/employees/profile-picture", formData);
+      setEmployee((prev) =>
+        prev ? { ...prev, profilePicture: res.data.filePath } : prev,
+      );
+      alert("Profile picture uploaded!");
+    } catch (err) {
+      console.log(err);
+      alert("Upload failed");
+    }
   };
 
   if (loading) return <p>Loading...</p>;
@@ -131,7 +138,7 @@ const EmployeeInfoPage = () => {
         editable={editable}
       />
 
-      <DocumentsSection documents={documents} />
+      <DocumentsSection documents={employee.documents || {}} />
     </div>
   );
 };

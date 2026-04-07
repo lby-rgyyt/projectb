@@ -62,6 +62,7 @@ export interface Employee {
   };
   emergencyContacts?: Contact[];
   onboardingApplication: OnboardingApplication | null;
+  documents?: Record<string, string>;
 }
 
 export interface RegistrationToken {

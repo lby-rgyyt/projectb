@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import nodemailer from "nodemailer";
 import VisaStatus from "../models/visaStatus.model.js";
 import type { IEmployee } from "../models/employee.model.js";
+import Employee from "../models/employee.model.js";
 
 export const getMyVisaStatus = async (
   req: Request,
@@ -207,6 +208,42 @@ export const sendNotificationEmail = async (
     });
 
     res.status(200).json({ success: true, message: "Notification sent." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createVisaStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.employee) {
+      res.status(401).json({ success: false, error: "Not authenticated" });
+      return;
+    }
+
+    const existing = await VisaStatus.findOne({ employeeId: req.employee.id });
+    if (existing) {
+      res
+        .status(409)
+        .json({ success: false, message: "Visa status already exists." });
+      return;
+    }
+
+    const visaStatus = await VisaStatus.create({
+      employeeId: req.employee.id,
+      currentStep: "optReceipt",
+      currentStatus: "pendingSubmit",
+    });
+
+    // 关联到 employee
+    await Employee.findByIdAndUpdate(req.employee.id, {
+      visaStatus: visaStatus._id,
+    });
+
+    res.status(201).json({ success: true, visaStatus });
   } catch (err) {
     next(err);
   }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import api from "../utils/api";
+import { handlePreview, handleDownload, handleUpload } from "../utils/document";
 import type { RootState } from "../store";
 import type { VisaStatus } from "../types";
 
@@ -87,8 +88,6 @@ const EmployeeVisaStatusPage = () => {
     activeTab === currentStep &&
     (currentStatus === "pendingSubmit" || currentStatus === "rejected");
 
-  const uploadFile = () => {};
-
   if (currentEmp?.visaType !== "F1(CPT/OPT)") {
     navigate("/");
   }
@@ -113,14 +112,20 @@ const EmployeeVisaStatusPage = () => {
             <p>HR Feedback: {visaStatus?.feedback}</p>
           </div>
         )}
-        
+
         {/* i983 should have two template file */}
         {activeTab === "i983" && (
           <div>
-            <a href="placeholder" download>
+            <a
+              href={`${import.meta.env.VITE_API_URL}/public/templates/i983-empty.pdf`}
+              download
+            >
               Empty Template
             </a>
-            <a href="placeholder" download>
+            <a
+              href={`${import.meta.env.VITE_API_URL}/public/templates/i983-sample.pdf`}
+              download
+            >
               Sample Template
             </a>
           </div>
@@ -128,14 +133,41 @@ const EmployeeVisaStatusPage = () => {
         {/* upload */}
         {canUpload && (
           <div>
-            <input type="file" accept=".pdf" onChange={uploadFile} />
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                try {
+                  await handleUpload(file, currentStep);
+                  alert("File uploaded successfully!");
+                  const res = await api.get("/api/visa-status/my-visa-status");
+                  setVisaStatus(res.data.visaStatus);
+                } catch {
+                  alert("Upload failed");
+                }
+              }}
+            />
           </div>
         )}
 
         {/* download and preview */}
-        {tabStatus === "approved" && (
+        {tabStatus !== "notStarted" && visaStatus?.documents?.[activeTab] && (
           <div>
             <p>Uploaded document: {stepLabels[activeTab]}</p>
+            <button
+              type="button"
+              onClick={() => handlePreview(visaStatus!.documents![activeTab])}
+            >
+              Preview
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDownload(visaStatus!.documents![activeTab])}
+            >
+              Download
+            </button>
           </div>
         )}
       </div>

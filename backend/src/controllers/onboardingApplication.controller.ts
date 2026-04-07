@@ -139,7 +139,7 @@ export const updateOnboardingApplication = async (
 
     const application = await OnboardingApplication.findByIdAndUpdate(
       id,
-      { $set: { updates } },
+      { $set: updates },
       { new: true },
     );
 

@@ -30,3 +30,19 @@ export const upload = multer({
   fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
+
+export const uploadAvatar = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, "public/avatars/"),
+    filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
+  }),
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if ([".jpg", ".jpeg", ".png"].includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed."));
+    }
+  },
+  limits: { fileSize: 5 * 1024 * 1024 },
+});

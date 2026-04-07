@@ -1,6 +1,7 @@
 import { Modal } from "antd";
 import { useEffect, useState } from "react";
 import type { Employee, VisaStatus } from "../types";
+import { handlePreview, handleDownload } from "../utils/document";
 import api from "../utils/api";
 
 const getDaysLeft = (endDate?: string): number | string => {
@@ -29,10 +30,15 @@ const getNextStep = (vs: VisaStatus): string => {
 const VisaStatusManagementPage = () => {
   const [activeTab, setActiveTab] = useState("inProgress");
   const [visaStatuses, setVisaStatuses] = useState<VisaStatus[]>([]);
+  const [selectedDocVisa, setSelectedDocVisa] = useState<VisaStatus | null>(
+    null,
+  );
+
   const [search, setSearch] = useState("");
 
   const [approveModal, setApproveModal] = useState(false);
   const [rejectModal, setRejectModal] = useState(false);
+  const [docModal, setDocModal] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [selectedVisa, setSelectedVisa] = useState<VisaStatus | null>(null);
 
@@ -132,6 +138,33 @@ const VisaStatusManagementPage = () => {
         />
       </Modal>
 
+      <Modal
+        title={`Documents — ${(selectedDocVisa?.employeeId as Employee)?.firstName} ${(selectedDocVisa?.employeeId as Employee)?.lastName}`}
+        open={docModal}
+        footer={null}
+        onCancel={() => {
+          setDocModal(false);
+          setSelectedDocVisa(null);
+        }}
+      >
+        {selectedDocVisa?.documents &&
+        Object.keys(selectedDocVisa.documents).length > 0 ? (
+          Object.entries(selectedDocVisa.documents).map(([type, docId]) => (
+            <div key={type}>
+              <span>{type}</span>
+              <button type="button" onClick={() => handlePreview(docId)}>
+                Preview
+              </button>
+              <button type="button" onClick={() => handleDownload(docId)}>
+                Download
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No documents uploaded.</p>
+        )}
+      </Modal>
+
       <div>
         <button
           type="button"
@@ -180,9 +213,16 @@ const VisaStatusManagementPage = () => {
                     <td>{getNextStep(vs)}</td>
                     <td>
                       {/* action */}
-                      {/* {documents preview} */}
                       {vs.currentStatus === "pendingApprove" && (
                         <>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handlePreview(vs.documents![vs.currentStep])
+                            }
+                          >
+                            Preview
+                          </button>
                           <button
                             onClick={() => {
                               setSelectedVisa(vs);
@@ -244,7 +284,17 @@ const VisaStatusManagementPage = () => {
                     <td>{emp.visaStartDate || ""}</td>
                     <td>{emp.visaEndDate || ""}</td>
                     <td>{daysLeft}</td>
-                    <td>{/* documents */}</td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDocVisa(vs);
+                          setDocModal(true);
+                        }}
+                      >
+                        View Documents
+                      </button>
+                    </td>
                   </tr>
                 );
               })}

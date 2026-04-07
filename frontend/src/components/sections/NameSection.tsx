@@ -17,7 +17,7 @@ interface NameSectionProps {
   email: string;
   editable?: boolean;
   profilePicture?: string;
-  onUploadPicture?: (file: File) => void;
+  onUploadPicture?: (file: File) => Promise<void>;
 }
 
 const NameSection = ({
@@ -27,23 +27,23 @@ const NameSection = ({
   profilePicture,
   onUploadPicture,
 }: NameSectionProps) => {
-  const {
-    headerProps,
-    register,
-    errors,
-    disabled,
-  } = useEditableSection<NameFormData>(defaultValues);
+  const { headerProps, register, errors, disabled } =
+    useEditableSection<NameFormData>(defaultValues);
 
   return (
     <div>
-      <SectionHeader
-        title="Name"
-        editable={editable}
-        {...headerProps}
-      />
+      <SectionHeader title="Name" editable={editable} {...headerProps} />
       <div>
         <label>Profile Picture</label>
-        <img src={profilePicture || "default_avatar.png"} alt="avatar" />
+        <img
+          src={
+            profilePicture
+              ? `${import.meta.env.VITE_API_URL}/${profilePicture}`
+              : `${import.meta.env.VITE_API_URL}/public/avatars/default_avatar.png`
+          }
+          alt="avatar"
+        />
+
         {headerProps.isEditing && (
           <input
             type="file"

@@ -3,6 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 import api from "../utils/api";
+import { handleDownload, handlePreview, handleUpload } from "../utils/document";
 import type { OnboardingApplication, Contact } from "../types";
 import { Navigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -56,7 +57,10 @@ const OnboardingApplicationPage = () => {
   const [applicationData, setApplicationData] =
     useState<OnboardingApplication | null>(null);
 
+  const [documents, setDocuments] = useState<Record<string, string>>({});
+
   const [email, setEmail] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const [loading, setLoading] = useState(true);
   const curEmp = useSelector((state: RootState) => state.auth.employee);
 
@@ -125,6 +129,11 @@ const OnboardingApplicationPage = () => {
             // emp here is a complete object
             const emp = app.employeeId;
             setEmail(emp.email || "");
+            setProfilePicture(emp.profilePicture || "");
+            if (emp.documents) {
+              setDocuments(emp.documents);
+            }
+
             // set form data
             reset({
               firstName: emp.firstName || "",
@@ -194,6 +203,10 @@ const OnboardingApplicationPage = () => {
           setApplicationData(app);
           const emp = app.employeeId;
           setEmail(emp.email || "");
+          setProfilePicture(emp.profilePicture || "");
+          if (emp.documents) {
+            setDocuments(emp.documents);
+          }
           // set form data
           reset({
             firstName: emp.firstName || "",
@@ -286,6 +299,29 @@ const OnboardingApplicationPage = () => {
     }
   };
 
+  const onUpload = async (file: File, fileType: string) => {
+    try {
+      await handleUpload(file, fileType);
+      alert("File uploaded successfully!");
+    } catch (err) {
+      console.log(err);
+      alert("upload failed");
+    }
+  };
+
+  const uploadPic = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await api.put("/api/employees/profile-picture", formData);
+      setProfilePicture(res.data.filePath);
+      alert("Profile picture uploaded!");
+    } catch (err) {
+      console.log(err);
+      alert("Upload failed");
+    }
+  };
+
   const onSubmit = async (data: OnboardingApplicationFormData) => {
     try {
       // update employee info
@@ -297,7 +333,7 @@ const OnboardingApplicationPage = () => {
       } else {
         // update, clear feedback and update status
         await api.put(`/api/onboarding-applications/${applicationData.id}`, {
-          status: "pending",
+          status: "pendingApprove",
           feedback: "",
         });
       }
@@ -310,11 +346,6 @@ const OnboardingApplicationPage = () => {
         alert(error.response.data.message || "Submission failed");
       }
     }
-  };
-
-  // placeholder, need a real api to upload file
-  const uploadPic = (file: File) => {
-    console.log(file);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -373,7 +404,10 @@ const OnboardingApplicationPage = () => {
 
           <div>
             <label>Profile Picture</label>
-            <img src={"placeholder"} alt="avatar" />
+            <img
+              src={`${import.meta.env.VITE_API_URL}/${profilePicture || "public/avatars/default_avatar.png"}`}
+              alt="avatar"
+            />
             {canEdit && (
               <input
                 type="file"
@@ -572,10 +606,24 @@ const OnboardingApplicationPage = () => {
               {errors.visaType && <span>{errors.visaType.message}</span>}
             </div>
           )}
-          {/* placeholder: F1 employees need to upload file */}
-          {visaType === "F1(CPT/OPT)" && (
+          {/* F1 employees need to upload file */}
+          {visaType === "F1(CPT/OPT)" && canEdit && (
             <div>
               <label>F1(CPT/OPT) — Upload OPT Receipt</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  // create a visa status at the first time
+                  if (!applicationData) {
+                    await api.post("/api/visa-status/create");
+                  }
+                  // upload file
+                  await onUpload(file, "optReceipt");
+                }}
+              />
             </div>
           )}
 
@@ -802,6 +850,58 @@ const OnboardingApplicationPage = () => {
           </div>
         )}
       </form>
+
+      {/* Document, Upload and Preview */}
+      <div>
+        <h3>Documents</h3>
+
+        {/* Preview */}
+        {Object.keys(documents).length > 0 && (
+          <div>
+            <h4>Uploaded Files</h4>
+            {Object.entries(documents).map(([type, docId]) => (
+              <div key={type}>
+                <span>{type}</span>
+                <button type="button" onClick={() => handlePreview(docId)}>
+                  Preview
+                </button>
+                <button type="button" onClick={() => handleDownload(docId)}>
+                  Download
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload */}
+        {canEdit && (
+          <div>
+            <div>
+              <label>Driver's License</label>
+              <input
+                type="file"
+                accept=".pdf,image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onUpload(file, "driverLicense");
+                }}
+              />
+            </div>
+
+            <div>
+              <label>Work Authorization Document</label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onUpload(file, "workAuthorization");
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

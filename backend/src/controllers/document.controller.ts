@@ -61,6 +61,7 @@ export const uploadDocument = async (
         { $set: { [`documents.${fileType}`]: doc._id } },
       );
     }
+    res.status(201).json({ success: true, document: doc });
   } catch (err) {
     next(err);
   }

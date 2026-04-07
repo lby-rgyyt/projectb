@@ -6,7 +6,7 @@ import path from 'path';
 import authRouter from "./src/routes/auth.route.js";
 import employeeRouter from "./src/routes/employee.route.js"
 import registrationTokenRouter from "./src/routes/registrationToken.route.js"
-import onboardingApplicationRouter from "./src/routes/registrationToken.route.js"
+import onboardingApplicationRouter from "./src/routes/onboardingApplication.route.js"
 import visaStatusRouter from "./src/routes/visaStatus.route.js"
 import documentRouter from "./src/routes/document.route.js"
 

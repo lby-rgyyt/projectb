@@ -65,6 +65,28 @@ export const getEmployeesByName = async (
   }
 };
 
+export const uploadProfilePicture = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.employee) {
+    res.status(401).json({ success: false, error: "Not authenticated" });
+    return;
+  }
+  if (!req.file) {
+    res.status(400).json({ success: false, message: "No file uploaded." });
+    return;
+  }
+
+  const filePath = `public/avatars/${req.file.filename}`;
+  await Employee.findByIdAndUpdate(req.employee.id, {
+    profilePicture: filePath,
+  });
+
+  res.status(200).json({ success: true, filePath: filePath });
+};
+
 export const updateEmployeeInfo = async (
   req: Request,
   res: Response,

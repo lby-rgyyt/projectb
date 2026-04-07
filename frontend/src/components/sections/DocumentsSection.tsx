@@ -1,22 +1,23 @@
+import { handlePreview, handleDownload } from "../../utils/document";
+
 interface DocumentsSectionProps {
-  documents: { name: string; url: string }[];
+  documents: Record<string, string>;
 }
 
-const DocumentsSection = ({
-  documents
-}: DocumentsSectionProps) => {
+const DocumentsSection = ({ documents }: DocumentsSectionProps) => {
   return (
     <div>
       <h3>Documents</h3>
-      {documents.map((doc) => (
-        <div key={doc.name}>
-          <span>{doc.name}</span>
-          <a href={doc.url} target="_blank">
+      {Object.keys(documents).length === 0 && <p>No documents uploaded.</p>}
+      {Object.entries(documents).map(([type, docId]) => (
+        <div key={type}>
+          <span>{type}</span>
+          <button type="button" onClick={() => handlePreview(docId)}>
             Preview
-          </a>
-          <a href={doc.url} download>
+          </button>
+          <button type="button" onClick={() => handleDownload(docId)}>
             Download
-          </a>
+          </button>
         </div>
       ))}
     </div>

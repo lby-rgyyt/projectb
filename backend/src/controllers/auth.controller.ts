@@ -111,13 +111,7 @@ export const getMe = async (
     }
     res.status(200).json({
       success: true,
-      employee: {
-        id: employee._id,
-        username: employee.username,
-        email: employee.email,
-        role: employee.role,
-        onboardingApplication: employee.onboardingApplication,
-      },
+      employee: employee,
     });
   } catch (err) {
     next(err);
