@@ -1,6 +1,13 @@
 import { Layout, Menu, Button } from "antd";
 import type { MenuProps } from "antd";
-import { HomeOutlined, LogoutOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  LogoutOutlined,
+  UserOutlined,
+  FileOutlined,
+  TeamOutlined,
+  SolutionOutlined,
+} from "@ant-design/icons";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,10 +19,35 @@ type MenuItem = Required<MenuProps>["items"][number];
 const { Sider } = Layout;
 const employeeItems: MenuItem[] = [
   { key: "/", icon: <HomeOutlined />, label: <Link to="/">Home</Link> },
+  {
+    key: "/personal-info",
+    icon: <UserOutlined />,
+    label: <Link to="/personal-info">Personal Information</Link>,
+  },
+  {
+    key: "/visa-status",
+    icon: <FileOutlined />,
+    label: <Link to="/visa-status">Visa Status</Link>,
+  },
 ];
 
 const hrItems: MenuItem[] = [
   { key: "/", icon: <HomeOutlined />, label: <Link to="/">Home</Link> },
+  {
+    key: "/employees",
+    icon: <TeamOutlined />,
+    label: <Link to="/employees">Employee Profiles</Link>,
+  },
+  {
+    key: "/visa-status",
+    icon: <FileOutlined />,
+    label: <Link to="/visa-status">Visa Status</Link>,
+  },
+  {
+    key: "/hiring",
+    icon: <SolutionOutlined />,
+    label: <Link to="/hiring">Hiring Management</Link>,
+  },
 ];
 
 const Sidebar = () => {
