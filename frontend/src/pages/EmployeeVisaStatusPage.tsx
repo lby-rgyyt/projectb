@@ -6,7 +6,13 @@ import { handlePreview, handleDownload, handleUpload } from "../utils/document";
 import type { RootState } from "../store";
 import type { VisaStatus } from "../types";
 import { handleError } from "../utils/error";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,6 +82,10 @@ const EmployeeVisaStatusPage = () => {
   const currentStepIndex = steps.indexOf(currentStep);
   const activeTabIndex = steps.indexOf(activeTab);
 
+  const [redirectCountdown, setRedirectCountdown] = useState(5);
+  const shouldRedirect =
+    !loading && currentEmp && currentEmp.visaType !== "F1(CPT/OPT)";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -88,6 +98,22 @@ const EmployeeVisaStatusPage = () => {
     };
     fetchData();
   }, []);
+
+  // redirect
+  useEffect(() => {
+    if (shouldRedirect) {
+      const timer = setInterval(() => {
+        setRedirectCountdown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [shouldRedirect]);
+
+  useEffect(() => {
+    if (redirectCountdown <= 0) {
+      navigate("/");
+    }
+  }, [redirectCountdown, navigate]);
 
   // get the status of current tab
   const getTabStatus = (): string => {
@@ -107,9 +133,26 @@ const EmployeeVisaStatusPage = () => {
     activeTab === currentStep &&
     (currentStatus === "pendingSubmit" || currentStatus === "rejected");
 
-    if (!loading && currentEmp && currentEmp.visaType !== "F1(CPT/OPT)") {
-      navigate("/");
-    }
+  if (shouldRedirect) {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <CardTitle>No Visa Tracking Required</CardTitle>
+            <CardDescription>
+              Your work authorization type ({currentEmp?.visaType}) does not
+              require visa status tracking.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Redirecting to homepage in {redirectCountdown} seconds...
+            </p>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
 
   if (!activeTab) return null;
 
