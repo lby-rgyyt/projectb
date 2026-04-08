@@ -6,8 +6,8 @@ import api from "../utils/api";
 import { handleDownload, handlePreview, handleUpload } from "../utils/document";
 import type { OnboardingApplication, Contact } from "../types";
 import { Navigate, useParams } from "react-router-dom";
-import axios from "axios";
 import OnboardingStatusBanner from "../components/OnboardingStatusBanner";
+import { handleError } from "../utils/error";
 
 interface OnboardingApplicationFormData {
   firstName: string;
@@ -263,7 +263,7 @@ const OnboardingApplicationPage = () => {
           });
         }
       } catch (err) {
-        console.log(err);
+        handleError(err);
       } finally {
         setLoading(false);
       }
@@ -283,6 +283,7 @@ const OnboardingApplicationPage = () => {
       });
       setApplicationData({ ...applicationData, status: "approved" });
     } catch (err) {
+      handleError(err);
       console.log(err);
     }
   };
@@ -295,6 +296,7 @@ const OnboardingApplicationPage = () => {
       });
       setApplicationData({ ...applicationData, status: "rejected", feedback });
     } catch (err) {
+      handleError(err);
       console.log(err);
     }
   };
@@ -304,8 +306,8 @@ const OnboardingApplicationPage = () => {
       await handleUpload(file, fileType);
       alert("File uploaded successfully!");
     } catch (err) {
+      handleError(err);
       console.log(err);
-      alert("upload failed");
     }
   };
 
@@ -317,8 +319,8 @@ const OnboardingApplicationPage = () => {
       setProfilePicture(res.data.filePath);
       alert("Profile picture uploaded!");
     } catch (err) {
+      handleError(err);
       console.log(err);
-      alert("Upload failed");
     }
   };
 
@@ -341,10 +343,8 @@ const OnboardingApplicationPage = () => {
       // re-fetch data to reload page
       const res = await api.get("/api/onboarding-applications/my-application");
       setApplicationData(res.data.onboardingApplication);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        alert(error.response.data.message || "Submission failed");
-      }
+    } catch (err) {
+      handleError(err);
     }
   };
 

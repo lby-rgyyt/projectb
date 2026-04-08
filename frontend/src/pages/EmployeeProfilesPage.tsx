@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
-import axios from "axios";
 import type { Employee } from "../types";
+import { handleError } from "../utils/error";
 
 const EmployeeProfiles = () => {
   const [name, setName] = useState("");
@@ -15,10 +15,8 @@ const EmployeeProfiles = () => {
           params: { name: name },
         });
         setEmployees(res.data.employees);
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          alert(error.response.data.error);
-        }
+      } catch (err) {
+        handleError(err);
       }
     };
     fetchEmployees();

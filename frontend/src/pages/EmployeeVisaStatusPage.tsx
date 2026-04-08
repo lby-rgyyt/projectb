@@ -5,6 +5,7 @@ import api from "../utils/api";
 import { handlePreview, handleDownload, handleUpload } from "../utils/document";
 import type { RootState } from "../store";
 import type { VisaStatus } from "../types";
+import { handleError } from "../utils/error";
 
 const steps = ["optReceipt", "optEAD", "i983", "i20"];
 const stepLabels: Record<string, string> = {
@@ -64,7 +65,7 @@ const EmployeeVisaStatusPage = () => {
         setVisaStatus(res.data.visaStatus);
         setActiveTab(res.data.visaStatus.currentStep);
       } catch (err) {
-        console.log(err);
+        handleError(err);
       }
     };
     fetchData();
@@ -144,8 +145,8 @@ const EmployeeVisaStatusPage = () => {
                   alert("File uploaded successfully!");
                   const res = await api.get("/api/visa-status/my-visa-status");
                   setVisaStatus(res.data.visaStatus);
-                } catch {
-                  alert("Upload failed");
+                } catch (err) {
+                  handleError(err);
                 }
               }}
             />

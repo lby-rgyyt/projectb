@@ -8,6 +8,7 @@ import ContactInfoSection from "../components/sections/ContactInfoSection";
 import EmploymentSection from "../components/sections/EmploymentSection";
 import EmergencyContactSection from "../components/sections/EmergencyContactSection";
 import DocumentsSection from "../components/sections/DocumentsSection";
+import { handleError } from "../utils/error";
 
 const EmployeeInfoPage = () => {
   // hr: /employees/:id
@@ -34,7 +35,7 @@ const EmployeeInfoPage = () => {
           setEmployee(res.data.employee);
         }
       } catch (err) {
-        console.error(err);
+        handleError(err);
       } finally {
         setLoading(false);
       }
@@ -53,7 +54,7 @@ const EmployeeInfoPage = () => {
       alert("Profile picture uploaded!");
     } catch (err) {
       console.log(err);
-      alert("Upload failed");
+      handleError(err);
     }
   };
 

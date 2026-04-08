@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../store";
 import { setCredentials } from "../store/slices/authSlice";
 import api from "../utils/api";
+import { handleError } from "../utils/error";
 
 const SignUpPage = () => {
   const [searchParams] = useSearchParams();
@@ -114,7 +115,7 @@ const SignUpPage = () => {
           employee: response.data.employee,
         }),
       );
-      navigate("/onboardingApplication");
+      navigate("/onboarding-application");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const errors = error.response.data.errors;
@@ -128,7 +129,7 @@ const SignUpPage = () => {
           setEmailError(errors["email"]);
         }
       } else {
-        alert("Network error, please try again");
+        handleError(error);
       }
     }
   };

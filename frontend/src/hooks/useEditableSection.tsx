@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { DefaultValues, FieldValues } from "react-hook-form";
 import api from "../utils/api";
+import { handleError } from "../utils/error";
 
 // const useEditableSection = <T extends Record<string, any>>(
 //   defaultValues: T,
@@ -22,8 +23,8 @@ const useEditableSection = <T extends FieldValues>(
     try {
       await api.put("/api/employees/update", data);
       setIsEditing(false);
-    } catch {
-      alert("Update failed");
+    } catch(err) {
+      handleError(err);
     }
   };
   const onCancel = () => {

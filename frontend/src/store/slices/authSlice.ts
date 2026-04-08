@@ -1,16 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { AuthState } from "../../types";
+import api from "../../utils/api";
 import axios from "axios";
 
 export const fetchCurrentEmployee = createAsyncThunk(
   "auth/fetchCurrentEmployee",
   async (_, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/auth/me`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const res = await api.get("/api/auth/me");
       return res.data.employee;
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -36,7 +33,7 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (state, action) => {
       state.token = action.payload.token;
-      state.employee = action.payload.user;
+      state.employee = action.payload.employee;
       localStorage.setItem("token", action.payload.token);
     },
     signout: (state) => {

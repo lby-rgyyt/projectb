@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { RegistrationToken } from "../types";
 import { useForm } from "react-hook-form";
 import api from "../utils/api";
-import axios from "axios";
+import { handleError } from "../utils/error";
 
 interface TokenFormData {
   name: string;
@@ -24,7 +24,7 @@ const RegistrationTokenManagement = () => {
         const res = await api.get("/api/registration-tokens/all");
         setTokens(res.data.tokens);
       } catch (err) {
-        console.log(err);
+        handleError(err);
       }
     };
     fetchTokens();
@@ -37,11 +37,8 @@ const RegistrationTokenManagement = () => {
       setTokens(res.data.tokens);
       // clear form
       reset();
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        const msg = error.response.data.error;
-        alert(msg);
-      }
+    } catch (err) {
+      handleError(err);
     }
   };
 

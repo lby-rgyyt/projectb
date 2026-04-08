@@ -4,10 +4,9 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../store";
-import {
-  setCredentials,
-} from "../store/slices/authSlice";
+import { setCredentials } from "../store/slices/authSlice";
 import api from "../utils/api";
+import { handleError } from "../utils/error";
 
 const SignInPage = () => {
   const [username, setUsername] = useState("");
@@ -61,7 +60,7 @@ const SignInPage = () => {
         ) {
           navigate("/");
         } else {
-          navigate("/onboardingApplication");
+          navigate("/onboarding-application");
         }
       } else {
         navigate("/");
@@ -77,7 +76,7 @@ const SignInPage = () => {
           setUsernameError(msg);
         }
       } else {
-        alert("Network error, please try again");
+        handleError(error);
       }
     }
   };

@@ -9,7 +9,7 @@ import { authentication, authorize } from "../middleware/auth.middleware.js";
 const router = Router();
 
 router.get("/all", authentication, authorize("hr"), getTokenHistory);
-router.get("/check", authentication, authorize("hr"), checkToken);
+router.get("/check", checkToken);
 router.post("/invite",authentication,authorize("hr"),sendRegistrationEmail);
 
 export default router;

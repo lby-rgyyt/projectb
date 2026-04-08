@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Employee, VisaStatus } from "../types";
 import { handlePreview, handleDownload } from "../utils/document";
 import api from "../utils/api";
+import { handleError } from "../utils/error";
 
 const getDaysLeft = (endDate?: string): number | string => {
   if (!endDate) return "N/A";
@@ -60,7 +61,7 @@ const VisaStatusManagementPage = () => {
           setVisaStatuses(res.data.visaStatuses);
         }
       } catch (err) {
-        console.log(err);
+        handleError(err);
       }
     };
     fetchData();
@@ -79,11 +80,16 @@ const VisaStatusManagementPage = () => {
       setApproveModal(false);
       setFeedback("");
     } catch (err) {
+      handleError(err);
       console.log(err);
     }
   };
 
   const handleReject = async () => {
+    if (!feedback.trim()) {
+      alert("Please provide feedback before rejecting.");
+      return;
+    }
     try {
       const res = await api.put(`/api/visa-status/${selectedVisa?.id}`, {
         currentStatus: "rejected",
@@ -97,6 +103,7 @@ const VisaStatusManagementPage = () => {
       setRejectModal(false);
       setFeedback("");
     } catch (err) {
+      handleError(err);
       console.log(err);
     }
   };
@@ -106,6 +113,7 @@ const VisaStatusManagementPage = () => {
       await api.post(`/api/visa-status/notify/${vs.id}`);
       alert("Notification has been sent.");
     } catch (err) {
+      handleError(err);
       console.log(err);
     }
   };
