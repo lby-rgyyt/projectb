@@ -1,19 +1,20 @@
-import useEditableSection from "../../hooks/useEditableSection";
-import SectionHeader from "../SectionHeader";
-
-interface NameFormData {
-  firstName: string;
-  lastName: string;
-  middleName?: string;
-  preferredName?: string;
-  ssn: string;
-  dateOfBirth: string;
-  gender: string;
-  profilePicture?: string;
-}
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { FieldValues } from "react-hook-form";
+import { nameSchema, nameFields } from "@/config/formConfig";
+import { Form } from "@/components/ui/form";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import FormSection from "./FormSection";
+import api from "@/utils/api";
+import { handleError } from "@/utils/error";
 
 interface NameSectionProps {
-  defaultValues: NameFormData;
+  defaultValues: FieldValues;
   email: string;
   editable?: boolean;
   profilePicture?: string;
@@ -27,105 +28,97 @@ const NameSection = ({
   profilePicture,
   onUploadPicture,
 }: NameSectionProps) => {
-  const { headerProps, register, errors, disabled } =
-    useEditableSection<NameFormData>(defaultValues);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const form = useForm({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(nameSchema) as any,
+    defaultValues,
+  });
+
+  const onSave = async (data: FieldValues) => {
+    try {
+      await api.put("/api/employees/update", data);
+      setIsEditing(false);
+    } catch (err) {
+      handleError(err);
+    }
+  };
+
+  const onCancel = () => {
+    form.reset();
+    setIsEditing(false);
+  };
 
   return (
-    <div>
-      <SectionHeader title="Name" editable={editable} {...headerProps} />
-      <div>
-        <label>Profile Picture</label>
-        <img
-          src={
-            profilePicture
-              ? `${import.meta.env.VITE_API_URL}/${profilePicture}`
-              : `${import.meta.env.VITE_API_URL}/public/avatars/default_avatar.png`
-          }
-          alt="avatar"
-        />
-
-        {headerProps.isEditing && (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file && onUploadPicture) onUploadPicture(file);
-            }}
-          />
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Name</CardTitle>
+        {editable && (
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <Button
+                  size="sm"
+                  onClick={form.handleSubmit(onSave)}
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? "Saving..." : "Save"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={onCancel}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit
+              </Button>
+            )}
+          </div>
         )}
-      </div>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-6">
+        {/* profile picture */}
+        <fieldset className="flex items-center gap-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage
+              src={
+                profilePicture
+                  ? `${import.meta.env.VITE_API_URL}/${profilePicture}`
+                  : `${import.meta.env.VITE_API_URL}/public/avatars/default_avatar.png`
+              }
+              alt="avatar"
+            />
+            <AvatarFallback>N/A</AvatarFallback>
+          </Avatar>
+          {isEditing && onUploadPicture && (
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onUploadPicture(file);
+              }}
+            />
+          )}
+        </fieldset>
 
-      <div>
-        <label>First Name *</label>
-        <input
-          {...register("firstName", { required: "First name is required." })}
-          disabled={disabled}
-        />
-        {errors.firstName && <span>{errors.firstName.message}</span>}
-      </div>
+        {/* Email, readonly */}
+        <fieldset>
+          <Label>Email</Label>
+          <Input value={email} disabled />
+        </fieldset>
 
-      <div>
-        <label>Last Name *</label>
-        <input
-          {...register("lastName", { required: "Last name is required." })}
-          disabled={disabled}
-        />
-        {errors.lastName && <span>{errors.lastName.message}</span>}
-      </div>
-
-      <div>
-        <label>Middle Name</label>
-        <input {...register("middleName")} disabled={disabled} />
-      </div>
-
-      <div>
-        <label>Preferred Name</label>
-        <input {...register("preferredName")} disabled={disabled} />
-      </div>
-
-      <div>
-        <label>Email</label>
-        <input value={email} disabled />
-      </div>
-
-      <div>
-        <label>SSN *</label>
-        <input
-          {...register("ssn", { required: "SSN is required." })}
-          disabled={disabled}
-        />
-        {errors.ssn && <span>{errors.ssn.message}</span>}
-      </div>
-
-      <div>
-        <label>Date of Birth *</label>
-        <input
-          type="date"
-          {...register("dateOfBirth", {
-            required: "Date of birth is required.",
-          })}
-          disabled={disabled}
-        />
-        {errors.dateOfBirth && <span>{errors.dateOfBirth.message}</span>}
-      </div>
-
-      <div>
-        <label>Gender *</label>
-        <select
-          {...register("gender", { required: "Gender is required." })}
-          disabled={disabled}
-        >
-          <option value="">Select...</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="I do not wish to answer">
-            I do not wish to answer
-          </option>
-        </select>
-        {errors.gender && <span>{errors.gender.message}</span>}
-      </div>
-    </div>
+        {/* resue FormSection */}
+        <Form {...form}>
+          <FormSection form={form} fields={nameFields} disabled={!isEditing} />
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 

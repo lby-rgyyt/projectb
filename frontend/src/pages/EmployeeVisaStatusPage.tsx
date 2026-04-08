@@ -6,6 +6,23 @@ import { handlePreview, handleDownload, handleUpload } from "../utils/document";
 import type { RootState } from "../store";
 import type { VisaStatus } from "../types";
 import { handleError } from "../utils/error";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Check } from "lucide-react";
+import {
+  Stepper,
+  StepperNav,
+  StepperItem,
+  StepperTrigger,
+  StepperIndicator,
+  StepperSeparator,
+  StepperTitle,
+  StepperPanel,
+  StepperContent,
+} from "@/components/reui/stepper";
+import { toast } from "sonner";
 
 const steps = ["optReceipt", "optEAD", "i983", "i20"];
 const stepLabels: Record<string, string> = {
@@ -52,6 +69,7 @@ const EmployeeVisaStatusPage = () => {
   const [activeTab, setActiveTab] = useState("");
 
   const currentEmp = useSelector((state: RootState) => state.auth.employee);
+  const loading = useSelector((state: RootState) => state.auth.loading);
 
   const currentStep = visaStatus?.currentStep || "";
   const currentStatus = visaStatus?.currentStatus || "";
@@ -89,90 +107,137 @@ const EmployeeVisaStatusPage = () => {
     activeTab === currentStep &&
     (currentStatus === "pendingSubmit" || currentStatus === "rejected");
 
-  if (currentEmp?.visaType !== "F1(CPT/OPT)") {
-    navigate("/");
-  }
+    if (!loading && currentEmp && currentEmp.visaType !== "F1(CPT/OPT)") {
+      navigate("/");
+    }
+
+  if (!activeTab) return null;
 
   return (
-    <div>
-      <h1>Visa Status Management</h1>
-      <div>
-        {steps.map((s) => (
-          <button key={s} type="button" onClick={() => setActiveTab(s)}>
-            {stepLabels[s]}
-          </button>
-        ))}
-      </div>
+    <section className="flex flex-col gap-6">
+      <h1 className="text-2xl font-bold">Visa Status Management</h1>
 
-      <div>
-        <h3>{stepLabels[activeTab]}</h3>
+      <Stepper
+        value={steps.indexOf(activeTab) + 1}
+        onValueChange={(val) => setActiveTab(steps[val - 1])}
+        indicators={{ completed: <Check className="h-3 w-3" /> }}
+      >
+        <StepperNav>
+          {steps.map((s, i) => (
+            <StepperItem key={s} step={i + 1} completed={i < currentStepIndex}>
+              <StepperTrigger>
+                <StepperIndicator>{i + 1}</StepperIndicator>
+                <StepperTitle>{stepLabels[s]}</StepperTitle>
+              </StepperTrigger>
+              {i < steps.length - 1 && <StepperSeparator />}
+            </StepperItem>
+          ))}
+        </StepperNav>
 
-        <p>{message}</p>
-        {activeTab === currentStep && currentStatus === "rejected" && (
-          <div>
-            <p>HR Feedback: {visaStatus?.feedback}</p>
-          </div>
-        )}
+        <StepperPanel>
+          {steps.map((s, i) => (
+            <StepperContent key={s} value={i + 1}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{stepLabels[s]}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                  {/* Status message */}
+                  {message && (
+                    <Alert
+                      variant={
+                        tabStatus === "rejected" ? "destructive" : "default"
+                      }
+                    >
+                      <AlertDescription>{message}</AlertDescription>
+                    </Alert>
+                  )}
 
-        {/* i983 should have two template file */}
-        {activeTab === "i983" && (
-          <div>
-            <a
-              href={`${import.meta.env.VITE_API_URL}/public/templates/i983-empty.pdf`}
-              download
-            >
-              Empty Template
-            </a>
-            <a
-              href={`${import.meta.env.VITE_API_URL}/public/templates/i983-sample.pdf`}
-              download
-            >
-              Sample Template
-            </a>
-          </div>
-        )}
-        {/* upload */}
-        {canUpload && (
-          <div>
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                try {
-                  await handleUpload(file, currentStep);
-                  alert("File uploaded successfully!");
-                  const res = await api.get("/api/visa-status/my-visa-status");
-                  setVisaStatus(res.data.visaStatus);
-                } catch (err) {
-                  handleError(err);
-                }
-              }}
-            />
-          </div>
-        )}
+                  {/* Rejected feedback */}
+                  {s === currentStep && currentStatus === "rejected" && (
+                    <Alert variant="destructive">
+                      <AlertTitle>HR Feedback</AlertTitle>
+                      <AlertDescription>
+                        {visaStatus?.feedback}
+                      </AlertDescription>
+                    </Alert>
+                  )}
 
-        {/* download and preview */}
-        {tabStatus !== "notStarted" && visaStatus?.documents?.[activeTab] && (
-          <div>
-            <p>Uploaded document: {stepLabels[activeTab]}</p>
-            <button
-              type="button"
-              onClick={() => handlePreview(visaStatus!.documents![activeTab])}
-            >
-              Preview
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDownload(visaStatus!.documents![activeTab])}
-            >
-              Download
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+                  {/* I-983 templates */}
+                  {s === "i983" && (
+                    <nav className="flex gap-2">
+                      <Button variant="outline" asChild>
+                        <a
+                          href={`${import.meta.env.VITE_API_URL}/public/templates/i983-empty.pdf`}
+                          download
+                        >
+                          Empty Template
+                        </a>
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <a
+                          href={`${import.meta.env.VITE_API_URL}/public/templates/i983-sample.pdf`}
+                          download
+                        >
+                          Sample Template
+                        </a>
+                      </Button>
+                    </nav>
+                  )}
+
+                  {/* Upload */}
+                  {canUpload && s === activeTab && (
+                    <fieldset>
+                      <Input
+                        type="file"
+                        accept=".pdf"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            await handleUpload(file, currentStep);
+                            toast.success("File uploaded successfully!");
+                            const res = await api.get(
+                              "/api/visa-status/my-visa-status",
+                            );
+                            setVisaStatus(res.data.visaStatus);
+                          } catch (err) {
+                            handleError(err);
+                          }
+                        }}
+                      />
+                    </fieldset>
+                  )}
+
+                  {/* Preview / Download */}
+                  {tabStatus !== "notStarted" && visaStatus?.documents?.[s] && (
+                    <fieldset className="flex items-center gap-2">
+                      <p className="text-sm">Uploaded: {stepLabels[s]}</p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handlePreview(visaStatus!.documents![s])}
+                      >
+                        Preview
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleDownload(visaStatus!.documents![s])
+                        }
+                      >
+                        Download
+                      </Button>
+                    </fieldset>
+                  )}
+                </CardContent>
+              </Card>
+            </StepperContent>
+          ))}
+        </StepperPanel>
+      </Stepper>
+    </section>
   );
 };
 

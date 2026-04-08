@@ -1,61 +1,41 @@
-import { Layout, Menu, Button } from "antd";
-import type { MenuProps } from "antd";
-import {
-  HomeOutlined,
-  LogoutOutlined,
-  UserOutlined,
-  FileOutlined,
-  TeamOutlined,
-  SolutionOutlined,
-} from "@ant-design/icons";
-
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { signout } from "../store/slices/authSlice";
 import type { RootState } from "../store";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar";
+import { Home, User, FileText, Users, Briefcase, LogOut } from "lucide-react";
 
-type MenuItem = Required<MenuProps>["items"][number];
-
-const { Sider } = Layout;
-const employeeItems: MenuItem[] = [
-  { key: "/", icon: <HomeOutlined />, label: <Link to="/">Home</Link> },
-  {
-    key: "/personal-info",
-    icon: <UserOutlined />,
-    label: <Link to="/personal-info">Personal Information</Link>,
-  },
-  {
-    key: "/visa-status",
-    icon: <FileOutlined />,
-    label: <Link to="/visa-status">Visa Status</Link>,
-  },
+const employeeItems = [
+  { path: "/", icon: Home, label: "Home" },
+  { path: "/onboarding-application", icon: FileText, label: "Onboarding" },
+  { path: "/personal-info", icon: User, label: "Personal Information" },
+  { path: "/my-visa-status", icon: FileText, label: "Visa Status" },
 ];
 
-const hrItems: MenuItem[] = [
-  { key: "/", icon: <HomeOutlined />, label: <Link to="/">Home</Link> },
-  {
-    key: "/employees",
-    icon: <TeamOutlined />,
-    label: <Link to="/employees">Employee Profiles</Link>,
-  },
-  {
-    key: "/visa-status",
-    icon: <FileOutlined />,
-    label: <Link to="/visa-status">Visa Status</Link>,
-  },
-  {
-    key: "/hiring",
-    icon: <SolutionOutlined />,
-    label: <Link to="/hiring">Hiring Management</Link>,
-  },
+const hrItems = [
+  { path: "/", icon: Home, label: "Home" },
+  { path: "/employees", icon: Users, label: "Employee Profiles" },
+  { path: "/visa-status", icon: FileText, label: "Visa Status Management" },
+  { path: "/hiring", icon: Briefcase, label: "Hiring Management" },
 ];
 
-const Sidebar = () => {
+const AppSidebar = () => {
   const employee = useSelector((state: RootState) => state.auth.employee);
   const token = useSelector((state: RootState) => state.auth.token);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const items = employee?.role === "hr" ? hrItems : employeeItems;
 
   const handleClick = () => {
     dispatch(signout());
@@ -63,18 +43,39 @@ const Sidebar = () => {
   };
 
   return (
-    <Sider collapsible>
-      <Menu
-        mode="inline"
-        selectedKeys={[location.pathname]}
-        items={employee?.role === "hr" ? hrItems : employeeItems}
-      />
+    <Sidebar>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton asChild isActive={location.pathname === item.path}>
+                    <Link to={item.path}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
       {token && (
-        <Button type="text" icon={<LogoutOutlined />} onClick={handleClick}>
-          Sign Out
-        </Button>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton onClick={() => { handleClick(); }}>
+                <LogOut />
+                <span>Sign Out</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
       )}
-    </Sider>
+    </Sidebar>
   );
 };
-export default Sidebar;
+export default AppSidebar;

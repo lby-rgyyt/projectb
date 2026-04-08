@@ -13,6 +13,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import EmployeeProfilesPage from "./pages/EmployeeProfilesPage";
 import HiringManagementPage from "./pages/HiringManagementPage";
 import VisaStatusManagementPage from "./pages/VisaStatusManagementPage";
+import EmployeeVisaStatusPage from "./pages/EmployeeVisaStatusPage";
+
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -46,7 +48,8 @@ function App() {
               element={<OnboardingApplicationPage />}
             />
             <Route path="/personal-info" element={<EmployeeInfoPage />} />
-            <Route path="/visa-status" element={<VisaStatusManagementPage />} />
+            <Route path="/my-visa-status" element={<EmployeeVisaStatusPage />} />
+
 
             <Route element={<HRRoute />}>
               <Route path="/employees" element={<EmployeeProfilesPage />} />
@@ -54,6 +57,7 @@ function App() {
                 path="/employees/onboarding-application/:id"
                 element={<OnboardingApplicationPage />}
               />
+              <Route path="/visa-status" element={<VisaStatusManagementPage />} />
               <Route path="/employees/:id" element={<EmployeeInfoPage />} />
               <Route path="/hiring" element={<HiringManagementPage />} />
             </Route>

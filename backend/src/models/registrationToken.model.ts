@@ -31,6 +31,8 @@ const registerTokenSchema = new Schema<IRegistrationToken>({
   },
 });
 
+registerTokenSchema.set("toJSON", { virtuals: true });
+
 const RegisterToken = mongoose.model<IRegistrationToken>(
   "RegisterToken",
   registerTokenSchema,

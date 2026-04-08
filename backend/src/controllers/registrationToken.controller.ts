@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import RegisterToken from "../models/registrationToken.js";
+import RegisterToken from "../models/registrationToken.model.js";
 import Employee from "../models/employee.model.js";
 import nodemailer from "nodemailer";
 import crypto from "crypto";

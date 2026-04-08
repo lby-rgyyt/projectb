@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import Employee from "../models/employee.model.js";
-import RegisterToken from "../models/registrationToken.js";
+import RegisterToken from "../models/registrationToken.model.js";
 import type { Request, Response, NextFunction } from "express";
 
 export const register = async (

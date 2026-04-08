@@ -40,6 +40,8 @@ const documentSchema = new Schema<IDocument>(
   { timestamps: true },
 );
 
+documentSchema.set("toJSON", { virtuals: true });
+
 const FileDocument = mongoose.model<IDocument>("Document", documentSchema);
 
 export default FileDocument;

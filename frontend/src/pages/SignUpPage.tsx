@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import type { SubmitEvent } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -7,6 +6,42 @@ import type { AppDispatch } from "../store";
 import { setCredentials } from "../store/slices/authSlice";
 import api from "../utils/api";
 import { handleError } from "../utils/error";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Eye, EyeOff } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const signUpSchema = z
+  .object({
+    username: z.string().min(1, "Username is required"),
+    password: z.string().min(1, "Password is required"),
+    confirmPassword: z.string().min(1, "Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Two passwords must be same.",
+    path: ["confirmPassword"],
+  });
+
+type SignUpFormData = z.infer<typeof signUpSchema>;
 
 const SignUpPage = () => {
   const [searchParams] = useSearchParams();
@@ -17,26 +52,19 @@ const SignUpPage = () => {
   const [loading, setLoading] = useState(true);
   const [tokenError, setTokenError] = useState("");
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [usernameError, setUsernameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const form = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { username: "", password: "", confirmPassword: "" },
+  });
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
   const checkToken = async () => {
     try {
-      //   await axios.get(
-      //     `${import.meta.env.VITE_API_URL}/api/registration-tokens/check`,
-      //     { params: { token: registrationToken } },
-      //   );
       await api.get("/api/registration-tokens/check", {
         params: { token: registrationToken },
       });
@@ -65,48 +93,12 @@ const SignUpPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const validate = () => {
-    let valid = true;
-    setUsernameError("");
-    setPasswordError("");
-    setConfirmPasswordError("");
-    if (!username) {
-      setUsernameError("Username is required");
-      valid = false;
-    }
-    if (!password) {
-      setPasswordError("Password is required");
-      valid = false;
-    }
-    if (!confirmPassword) {
-      setConfirmPasswordError("Confirm password is required");
-      valid = false;
-    }
-    if (password && confirmPassword && password !== confirmPassword) {
-      setPasswordError("Two passwords must be same.");
-      setConfirmPasswordError("Two passwords must be same.");
-      valid = false;
-    }
-    return valid;
-  };
-
-  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validate()) return;
+  const handleSubmit = async (data: SignUpFormData) => {
     try {
-      //   const response = await axios.post(
-      //     `${import.meta.env.VITE_API_URL}/api/auth/register`,
-      //     {
-      //       username,
-      //       email,
-      //       password,
-      //       registrationToken
-      //     },
-      //   );
       const response = await api.post("/api/auth/register", {
-        username,
+        username: data.username,
         email,
-        password,
+        password: data.password,
         registrationToken,
       });
       dispatch(
@@ -119,14 +111,8 @@ const SignUpPage = () => {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const errors = error.response.data.errors;
-        if (
-          "username" in errors &&
-          errors["username"] === "Username already in use"
-        ) {
-          setUsernameError(errors["username"]);
-        }
-        if ("email" in errors && errors["email"] === "Email already in use") {
-          setEmailError(errors["email"]);
+        if (errors?.username) {
+          form.setError("username", { message: errors.username });
         }
       } else {
         handleError(error);
@@ -135,75 +121,151 @@ const SignUpPage = () => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      </main>
+    );
   }
+
   if (!tokenValid)
     return (
-      <div>
-        <h1>Invalid Registration Link</h1>
-        <p>{tokenError || "This registration link is invalid or expired."}</p>
-      </div>
+      <main className="flex min-h-screen items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Invalid Registration Link</CardTitle>
+            <CardDescription>
+              {tokenError || "This registration link is invalid or expired."}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </main>
     );
 
   return (
-    <>
-      <h1>Create Account</h1>
-      <p>Complete your registration to get started</p>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Choose a unique username"
-          />
-          {usernameError && <span>{usernameError}</span>}
-        </div>
-        <div>
-          <label>Email</label>
-          <input disabled type="text" value={email || ""} />
-          {emailError && <span>{emailError}</span>}
-        </div>
-        <div>
-          <label>Password</label>
-          <div>
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
+    <main className="flex min-h-screen items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Create Account</CardTitle>
+          <CardDescription>
+            Complete your registration to get started
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              noValidate
+              className="flex flex-col gap-4"
             >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-          {passwordError && <span>{passwordError}</span>}
-        </div>
-        <div>
-          <label>Confirm Password</label>
-          <div>
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-          {confirmPasswordError && <span>{confirmPasswordError}</span>}
-        </div>
-        <button type="submit">Register</button>
-      </form>
-    </>
+              {/* username */}
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Choose a unique username"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* email, readonly */}
+              <fieldset>
+                <Label>Email</Label>
+                <Input value={email || ""} disabled />
+              </fieldset>
+
+              {/* password */}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <fieldset className="flex gap-2">
+                        <Input
+                          {...field}
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Create a password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff /> : <Eye />}
+                        </Button>
+                      </fieldset>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* confirm password */}
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <fieldset className="flex gap-2">
+                        <Input
+                          {...field}
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm your password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                        >
+                          {showConfirmPassword ? <EyeOff /> : <Eye />}
+                        </Button>
+                      </fieldset>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Registering..." : "Register"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </main>
   );
 };
+
 export default SignUpPage;

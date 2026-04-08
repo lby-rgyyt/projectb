@@ -39,5 +39,7 @@ const visaStatusSchema = new Schema<IVisaStatus>(
   { timestamps: true },
 );
 
+visaStatusSchema.set("toJSON", { virtuals: true });
+
 const VisaStatus = mongoose.model<IVisaStatus>("VisaStatus", visaStatusSchema);
 export default VisaStatus;

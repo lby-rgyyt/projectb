@@ -143,6 +143,8 @@ employeeSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
+employeeSchema.set("toJSON", { virtuals: true });
+
 const Employee = mongoose.model<IEmployee>("Employee", employeeSchema);
 
 export default Employee;

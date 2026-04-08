@@ -2,13 +2,20 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import type { Employee } from "../types";
 import api from "../utils/api";
+import { handleError } from "../utils/error";
 import NameSection from "../components/sections/NameSection";
-import AddressSection from "../components/sections/AddressSection";
-import ContactInfoSection from "../components/sections/ContactInfoSection";
-import EmploymentSection from "../components/sections/EmploymentSection";
+import EditableSection from "../components/sections/EditableSection";
 import EmergencyContactSection from "../components/sections/EmergencyContactSection";
 import DocumentsSection from "../components/sections/DocumentsSection";
-import { handleError } from "../utils/error";
+import {
+  addressSchema,
+  addressFields,
+  contactSchema,
+  contactFields,
+  employmentSchema,
+  employmentFields,
+} from "../config/formConfig";
+import { toast } from "sonner";
 
 const EmployeeInfoPage = () => {
   // hr: /employees/:id
@@ -51,7 +58,7 @@ const EmployeeInfoPage = () => {
       setEmployee((prev) =>
         prev ? { ...prev, profilePicture: res.data.filePath } : prev,
       );
-      alert("Profile picture uploaded!");
+      toast.success("Profile picture uploaded!");
     } catch (err) {
       console.log(err);
       handleError(err);
@@ -62,13 +69,14 @@ const EmployeeInfoPage = () => {
   if (!employee) return <p>Employee not found</p>;
 
   return (
-    <div>
-      <h1>
+    <section className="flex flex-col gap-6">
+      <h1 className="text-2xl font-bold">
         {isOwner
           ? "Personal Information"
           : `${employee.firstName} ${employee.lastName}`}
       </h1>
 
+      {/* Name */}
       <NameSection
         defaultValues={{
           firstName: employee.firstName || "",
@@ -76,7 +84,7 @@ const EmployeeInfoPage = () => {
           middleName: employee.middleName || "",
           preferredName: employee.preferredName || "",
           ssn: employee.ssn || "",
-          dateOfBirth: employee.dateOfBirth || "",
+          dateOfBirth: employee.dateOfBirth?.split("T")[0] || "",
           gender: employee.gender || "",
         }}
         email={employee.email}
@@ -85,7 +93,11 @@ const EmployeeInfoPage = () => {
         onUploadPicture={onUploadPicture}
       />
 
-      <AddressSection
+      {/* Address */}
+      <EditableSection
+        title="Address"
+        schema={addressSchema}
+        fields={addressFields}
         defaultValues={{
           address: {
             building: employee.address?.building || "",
@@ -98,7 +110,11 @@ const EmployeeInfoPage = () => {
         editable={editable}
       />
 
-      <ContactInfoSection
+      {/* Contact Info */}
+      <EditableSection
+        title="Contact Info"
+        schema={contactSchema}
+        fields={contactFields}
         defaultValues={{
           cellPhone: employee.cellPhone || "",
           workPhone: employee.workPhone || "",
@@ -106,12 +122,16 @@ const EmployeeInfoPage = () => {
         editable={editable}
       />
 
-      <EmploymentSection
+      {/* Employment */}
+      <EditableSection
+        title="Employment"
+        schema={employmentSchema}
+        fields={employmentFields}
         defaultValues={{
           visaType: employee.visaType || "",
           visaTitle: employee.visaTitle || "",
-          visaStartDate: employee.visaStartDate || "",
-          visaEndDate: employee.visaEndDate || "",
+          visaStartDate: employee.visaStartDate?.split("T")[0] || "",
+          visaEndDate: employee.visaEndDate?.split("T")[0] || "",
         }}
         editable={editable}
       />
@@ -140,7 +160,7 @@ const EmployeeInfoPage = () => {
       />
 
       <DocumentsSection documents={employee.documents || {}} />
-    </div>
+    </section>
   );
 };
 

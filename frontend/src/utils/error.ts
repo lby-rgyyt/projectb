@@ -1,13 +1,18 @@
 import axios from "axios";
+import { toast } from "sonner";
 
-export const getErrorMessage = (err: unknown): string => {
+export const handleError = (err: unknown) => {
   if (axios.isAxiosError(err)) {
-    if (!err.response) return "Network error. Please check your connection.";
-    return (
+    if (!err.response) {
+      toast.error("Network error. Please check your connection.");
+      return;
+    }
+    toast.error(
       err.response.data?.message ||
-      err.response.data?.error ||
-      "Server error. Please try again."
+        err.response.data?.error ||
+        "Server error. Please try again.",
     );
+    return;
   }
-  return "An unexpected error occurred.";
+  toast.error("An unexpected error occurred.");
 };

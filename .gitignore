@@ -22,6 +22,10 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+.agents/
+./claude
+
+skills-lock.json
 
 # TypeScript
 *.tsbuildinfo

@@ -31,6 +31,8 @@ const onboardingApplicationSchema = new Schema<IOnboardingApplication>(
   { timestamps: true },
 );
 
+onboardingApplicationSchema.set("toJSON", { virtuals: true });
+
 const OnboardingApplication = mongoose.model<IOnboardingApplication>(
   "OnboardingApplication",
   onboardingApplicationSchema,

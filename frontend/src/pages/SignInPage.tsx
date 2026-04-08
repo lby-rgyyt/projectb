@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { SubmitEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -7,44 +6,50 @@ import type { AppDispatch } from "../store";
 import { setCredentials } from "../store/slices/authSlice";
 import api from "../utils/api";
 import { handleError } from "../utils/error";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Eye, EyeOff } from "lucide-react";
+import FormInput from "@/components/form/FormInput";
+
+const signInSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type SignInFormData = z.infer<typeof signInSchema>;
 
 const SignInPage = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [usernameError, setUsernameError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  const validate = () => {
-    let valid = true;
-    setUsernameError("");
-    setPasswordError("");
-    if (!username) {
-      setUsernameError("Username is required");
-      valid = false;
-    }
-    if (!password) {
-      setPasswordError("Password is required");
-      valid = false;
-    }
-    return valid;
-  };
+  const form = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: { username: "", password: "" },
+  });
 
-  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validate()) return;
+  const handleSubmit = async (data: SignInFormData) => {
     try {
-      //   const response = await axios.post(
-      //     `${import.meta.env.VITE_API_URL}/api/auth/login`,
-      //     { username, password },
-      //   );
-      const response = await api.post("/api/auth/login", {
-        username,
-        password,
-      });
+      const response = await api.post("/api/auth/login", data);
       dispatch(
         setCredentials({
           token: response.data.token,
@@ -52,7 +57,6 @@ const SignInPage = () => {
         }),
       );
       const employee = response.data.employee;
-
       if (employee.role === "employee") {
         if (
           employee.onboardingApplication &&
@@ -67,13 +71,21 @@ const SignInPage = () => {
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        const msg = error.response.data.error;
-        if (msg === "Username not existed") {
-          setUsernameError(msg);
-        } else if (msg === "Invalid password") {
-          setPasswordError(msg);
+        const data = error.response.data;
+        const msg = data.error || data.errors;
+
+        if (typeof msg === "string") {
+          if (msg.toLowerCase().includes("username")) {
+            form.setError("username", { message: "Username does not exist" });
+          } else if (msg.toLowerCase().includes("password")) {
+            form.setError("password", { message: "Incorrect password" });
+          } else {
+            form.setError("username", { message: msg });
+          }
         } else {
-          setUsernameError(msg);
+          form.setError("username", {
+            message: "Login failed. Please try again.",
+          });
         }
       } else {
         handleError(error);
@@ -81,41 +93,68 @@ const SignInPage = () => {
     }
   };
   return (
-    <>
-      <h1>Welcome Back</h1>
-      <p>Sign in to your HR Portal account</p>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter your username"
-          />
-          {usernameError && <span>{usernameError}</span>}
-        </div>
-        <div>
-          <label>Password</label>
-          <div>
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
+    <main className="flex min-h-screen items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Welcome Back</CardTitle>
+          <CardDescription>
+            Sign in to your Employee Portal account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              noValidate
+              className="flex flex-col gap-4"
             >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-          {passwordError && <span>{passwordError}</span>}
-        </div>
-        <button type="submit">Sign In</button>
-      </form>
-    </>
+              <FormInput
+                form={form}
+                name="username"
+                label="Username"
+                placeholder="Enter your username"
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <div className="flex gap-2">
+                        <Input
+                          {...field}
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff /> : <Eye />}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </main>
   );
 };
 

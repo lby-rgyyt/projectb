@@ -3,20 +3,39 @@ import type { RegistrationToken } from "../types";
 import { useForm } from "react-hook-form";
 import api from "../utils/api";
 import { handleError } from "../utils/error";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import FormInput from "@/components/form/FormInput";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
-interface TokenFormData {
-  name: string;
-  email: string;
-}
+const tokenSchema = z.object({
+  name: z.string().min(1, "Employee name is required"),
+  email: z
+    .string()
+    .min(1, "Employee email is required")
+    .email("Invalid email format"),
+});
+
+type TokenFormData = z.infer<typeof tokenSchema>;
 
 const RegistrationTokenManagement = () => {
   const [tokens, setTokens] = useState<RegistrationToken[]>([]);
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<TokenFormData>({ defaultValues: { name: "", email: "" } });
+
+  const form = useForm<TokenFormData>({
+    resolver: zodResolver(tokenSchema),
+    defaultValues: { name: "", email: "" },
+  });
 
   useEffect(() => {
     const fetchTokens = async () => {
@@ -36,72 +55,89 @@ const RegistrationTokenManagement = () => {
       const res = await api.get("/api/registration-tokens/all");
       setTokens(res.data.tokens);
       // clear form
-      reset();
+      form.reset();
     } catch (err) {
       handleError(err);
     }
   };
 
   return (
-    <>
-      <div>
-        <div>
-          <label>Employee Name *</label>
-          <input
-            {...register("name", {
-              required: "Employee name is required.",
-            })}
-          />
-          {errors.name && <span>{errors.name.message}</span>}
-        </div>
-        <div>
-          <label>Employee Email *</label>
-          <input
-            {...register("email", {
-              required: "Employee email is required.",
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Invalid email format.",
-              },
-            })}
-          />
-          {errors.email && <span>{errors.email.message}</span>}
-        </div>
-        <button
-          type="button"
-          onClick={handleSubmit(onSend)}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Sending..." : "Generate Token & Send Email"}
-        </button>
-      </div>
+    <section className="flex flex-col gap-6">
+      {/* Send Invitation */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Send Registration Invitation</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSend)}
+              noValidate
+              className="flex flex-col gap-4"
+            >
+              <FormInput
+                form={form}
+                name="name"
+                label="Employee Name *"
+                placeholder="Full name"
+              />
+              <FormInput
+                form={form}
+                name="email"
+                label="Employee Email *"
+                placeholder="email@example.com"
+              />
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting
+                  ? "Sending..."
+                  : "Generate Token & Send Email"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
 
-      <div>
-        <h3>Token History</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>EMAIL</th>
-              <th>NAME</th>
-              <th>REGISTRATION LINK</th>
-              <th>STATUS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tokens.map((t) => {
-              return (
-                <tr key={t.id}>
-                  <td>{t.email}</td>
-                  <td>{t.name}</td>
-                  <td>{t.link}</td>
-                  <td>{t.status}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </>
+      {/* Token History */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Token History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Registration Link</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tokens.map((t) => (
+                <TableRow key={t.id}>
+                  <TableCell>{t.email}</TableCell>
+                  <TableCell>{t.name}</TableCell>
+                  <TableCell className="max-w-xs truncate">{t.link}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        t.status === "registered"
+                          ? "default"
+                          : t.status === "expired"
+                            ? "destructive"
+                            : "secondary"
+                      }
+                    >
+                      {t.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </section>
   );
 };
 

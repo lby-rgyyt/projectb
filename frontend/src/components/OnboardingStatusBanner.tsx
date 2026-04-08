@@ -1,5 +1,19 @@
 import { useState } from "react";
 import type { OnboardingApplication } from "../types";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { CircleCheck, Clock, CircleX } from "lucide-react";
 
 interface OnboardingStatusBannerProps {
   applicationData: OnboardingApplication | null;
@@ -7,140 +21,165 @@ interface OnboardingStatusBannerProps {
   onApprove?: () => Promise<void>;
   onReject?: (feedback: string) => Promise<void>;
 }
+
 const OnboardingStatusBanner = ({
   applicationData,
   isOwner,
   onApprove,
   onReject,
 }: OnboardingStatusBannerProps) => {
-  const [approve, setApprove] = useState("");
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
 
+  if (!applicationData) return null;
+  const { status } = applicationData;
+
   return (
-    <>
-      {isOwner && applicationData !== null && (
-        <div>
-          {applicationData?.status === "approved" && (
-            <div>
-              <h3>Application Approved!</h3>
-              <p>
-                Your onboarding application has been approved. You now have full
-                access to the portal.
-              </p>
-              <p>
-                Use the side bar to access Personal Information and Visa Status
-                Management.
-              </p>
-            </div>
+    <section className="flex flex-col gap-4">
+      {/* Employee view */}
+      {isOwner && (
+        <>
+          {status === "approved" && (
+            <Alert>
+              <CircleCheck className="h-4 w-4" />
+              <AlertTitle>Application Approved!</AlertTitle>
+              <AlertDescription>
+                Your onboarding application has been approved. Use the sidebar
+                to access Personal Information and Visa Status Management.
+              </AlertDescription>
+            </Alert>
           )}
-          {applicationData?.status === "pending" && (
-            <div>
-              <h3>Application Pending Review</h3>
-              <p>
+          {status === "pending" && (
+            <Alert>
+              <Clock className="h-4 w-4" />
+              <AlertTitle>Application Pending Review</AlertTitle>
+              <AlertDescription>
                 Please wait for HR to review your application. You will be
                 notified once a decision is made.
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
           )}
-          {applicationData?.status === "rejected" && (
-            <div>
-              <h3>Application Rejected</h3>
-              <p>
+          {status === "rejected" && (
+            <Alert variant="destructive">
+              <CircleX className="h-4 w-4" />
+              <AlertTitle>Application Rejected</AlertTitle>
+              <AlertDescription>
                 Please review the feedback below, make the necessary changes,
                 and resubmit your application.
+              </AlertDescription>
+              <p className="mt-2 text-sm font-medium">
+                HR Feedback: {applicationData.feedback}
               </p>
-              <p>HR Feedbacks:</p>
-              <p>{applicationData.feedback}</p>
-            </div>
+            </Alert>
           )}
-        </div>
+        </>
       )}
 
-      {!isOwner && applicationData?.status === "pending" && (
-        <div>
-          <h3>Review Decision</h3>
-          <p>After reviewing the application, approve or reject it below.</p>
-          <button
-            type="button"
-            onClick={() => {
-              setApprove("yes");
-            }}
-          >
-            Approve Application
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setApprove("no");
-            }}
-          >
-            Reject Application
-          </button>
-          {approve === "no" && (
-            <div>
-              <label>Rejection Feedback *</label>
-              <input
-                value={feedback}
-                onChange={(e) => {
-                  setFeedback(e.target.value);
-                }}
-                placeholder="Explain what needs to be corrected so the employee can fix and resubmit"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (onReject) onReject(feedback);
-                }}
-              >
-                Confirm Rejection & Send Feedback
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setApprove("");
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-          {approve === "yes" && (
-            <div>
-              <label>Reconfirm to approve the application.</label>
-              <button
-                type="button"
-                onClick={() => {
-                  if (onApprove) onApprove();
-                }}
-              >
-                Confirm Approve
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setApprove("");
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      {/* HR view */}
+      {!isOwner && (
+        <>
+          {status === "pending" && (
+            <Alert>
+              <Clock className="h-4 w-4" />
+              <AlertTitle>Review Decision</AlertTitle>
+              <AlertDescription>
+                After reviewing the application, approve or reject it below.
+              </AlertDescription>
+              <nav className="mt-4 flex gap-2">
+                {/* Approve Dialog */}
+                <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
+                  <DialogTrigger asChild>
+                    <Button>Approve</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Confirm Approval</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to approve this application?
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setApproveOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={async () => {
+                          if (onApprove) await onApprove();
+                          setApproveOpen(false);
+                        }}
+                      >
+                        Confirm Approve
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
 
-      {!isOwner && applicationData?.status === "rejected" && (
-        <div>
-          <p>This application is rejected.</p>
-          <p>Feedback: {applicationData.feedback}</p>
-        </div>
-      )}
+                {/* Reject Dialog */}
+                <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive">Reject</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Reject Application</DialogTitle>
+                      <DialogDescription>
+                        Provide feedback so the employee can fix and resubmit.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <fieldset className="flex flex-col gap-2">
+                      <Label>Rejection Feedback *</Label>
+                      <Input
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
+                        placeholder="Explain what needs to be corrected"
+                      />
+                    </fieldset>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setRejectOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={async () => {
+                          if (onReject) await onReject(feedback);
+                          setRejectOpen(false);
+                        }}
+                      >
+                        Confirm Rejection
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </nav>
+            </Alert>
+          )}
 
-      {!isOwner && applicationData?.status === "approved" && (
-        <div>
-          <p>This application is approved.</p>
-        </div>
+          {status === "rejected" && (
+            <Alert variant="destructive">
+              <CircleX className="h-4 w-4" />
+              <AlertTitle>Application Rejected</AlertTitle>
+              <AlertDescription>
+                Feedback: {applicationData.feedback}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {status === "approved" && (
+            <Alert>
+              <CircleCheck className="h-4 w-4" />
+              <AlertTitle>Application Approved</AlertTitle>
+            </Alert>
+          )}
+        </>
       )}
-    </>
+    </section>
   );
 };
 

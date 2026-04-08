@@ -3,6 +3,19 @@ import { Link } from "react-router-dom";
 import api from "../utils/api";
 import type { Employee } from "../types";
 import { handleError } from "../utils/error";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 const EmployeeProfiles = () => {
   const [name, setName] = useState("");
@@ -28,51 +41,57 @@ const EmployeeProfiles = () => {
   };
 
   return (
-    <>
-      <h1>Employee Profiles</h1>
-      <p>{employees.length} employees(sort by last name) </p>
-      <input
+    <section className="flex flex-col gap-6">
+      <header>
+        <h1 className="text-2xl font-bold">Employee Profiles</h1>
+        <p className="text-sm text-muted-foreground">
+          {employees.length} employees (sorted by last name)
+        </p>
+      </header>
+
+      <Input
         value={name}
-        onChange={(e) => {
-          setName(e.target.value);
-        }}
+        onChange={(e) => setName(e.target.value)}
         placeholder="Search by first name, last name or preferred name..."
       />
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>NAME</th>
-              <th>SSN</th>
-              <th>WORK AUTH</th>
-              <th>PHONE</th>
-              <th>EMAIL</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map((employee) => {
-              return (
-                <tr key={employee.id}>
-                  <td>
-                    <Link to={`/employees/${employee.id}`} target="_blank">
+
+      <Card>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>SSN</TableHead>
+                <TableHead>Work Auth</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Email</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {employees.map((employee) => (
+                <TableRow key={employee.id}>
+                  <TableCell>
+                    <Link
+                      to={`/employees/${employee.id}`}
+                      target="_blank"
+                      className="text-primary underline"
+                    >
                       {`${employee.lastName || ""}, ${employee.firstName || ""}`}
                     </Link>
-                  </td>
-                  <td>{maskSSN(employee.ssn || "")}</td>
-                  <td>
-                    {employee.visaType
-                      ? employee.visaType
-                      : employee.visaTitle || ""}
-                  </td>
-                  <td>{employee.cellPhone || "N/A"}</td>
-                  <td>{employee.email}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </>
+                  </TableCell>
+                  <TableCell>{maskSSN(employee.ssn || "")}</TableCell>
+                  <TableCell>
+                    {employee.visaType || employee.visaTitle || ""}
+                  </TableCell>
+                  <TableCell>{employee.cellPhone || "N/A"}</TableCell>
+                  <TableCell>{employee.email}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </section>
   );
 };
 

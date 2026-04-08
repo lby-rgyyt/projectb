@@ -1,69 +1,94 @@
-import useEditableSection from "../../hooks/useEditableSection";
-import SectionHeader from "../SectionHeader";
-import { useFieldArray } from "react-hook-form";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import { useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import type { UseFormReturn, FieldValues } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  emergencyContactSchema,
+  emergencyContactFields,
+} from "@/config/formConfig";
+import { Form } from "@/components/ui/form";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import FormSection from "./FormSection";
+import api from "@/utils/api";
+import { handleError } from "@/utils/error";
 
-interface EmergencyContactFormData {
-  emergencyContacts: {
-    firstName: string;
-    lastName: string;
-    phone: string;
-    relationship: string;
-    email?: string;
-  }[];
-}
+const sectionSchema = z.object({
+  emergencyContacts: z.array(emergencyContactSchema).min(1),
+});
 
-interface EmergencyContactProps {
-  defaultValues: EmergencyContactFormData;
+interface EditableProps {
+  defaultValues: FieldValues;
   editable?: boolean;
 }
 
-interface EmergencyContactCardProps {
-  index: number;
-  register: UseFormRegister<EmergencyContactFormData>;
-  errors: FieldErrors<EmergencyContactFormData>;
-  disabled: boolean;
-  onRemove: () => void;
-  showRemove: boolean;
+interface EmbeddedProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: UseFormReturn<any>;
+  disabled?: boolean;
 }
 
-const EmergencyContactSection = ({
-  defaultValues,
-  editable = true,
-}: EmergencyContactProps) => {
-  const { headerProps, register, errors, disabled, control } =
-    useEditableSection<EmergencyContactFormData>(defaultValues);
+type EmergencyContactSectionProps = EditableProps | EmbeddedProps;
 
+// use this to determine whether it is used by onboarding/personal
+const isEmbedded = (
+  props: EmergencyContactSectionProps,
+): props is EmbeddedProps => "form" in props;
+
+const EmergencyContactSection = (props: EmergencyContactSectionProps) => {
+  if (isEmbedded(props)) {
+    return (
+      <EmergencyContactFields form={props.form} disabled={props.disabled} />
+    );
+  }
+  return <EditableEmergencyContacts {...props} />;
+};
+
+// OnboardingApplication, just rendering
+const EmergencyContactFields = ({
+  form,
+  disabled = false,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: UseFormReturn<any>;
+  disabled?: boolean;
+}) => {
   const { fields, append, remove } = useFieldArray({
-    control,
+    control: form.control,
     name: "emergencyContacts",
   });
 
   return (
-    <>
-      <div>
-        <SectionHeader
-          title="Employment Contact"
-          editable={editable}
-          {...headerProps}
-        />
-      </div>
-
+    <section className="flex flex-col gap-4">
       {fields.map((field, index) => (
-        <EmergencyContactCard
-          key={field.id}
-          index={index}
-          register={register}
-          errors={errors}
-          disabled={disabled}
-          onRemove={() => remove(index)}
-          showRemove={fields.length > 1}
-        />
+        <Card key={field.id}>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Emergency Contact #{index + 1}</CardTitle>
+            {fields.length > 1 && !disabled && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => remove(index)}
+              >
+                Remove
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            <FormSection
+              form={form}
+              fields={emergencyContactFields}
+              namePrefix={`emergencyContacts.${index}`}
+              disabled={disabled}
+            />
+          </CardContent>
+        </Card>
       ))}
-
       {!disabled && (
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() =>
             append({
               firstName: "",
@@ -75,84 +100,76 @@ const EmergencyContactSection = ({
           }
         >
           + Add Another Emergency Contact
-        </button>
+        </Button>
       )}
-    </>
+    </section>
   );
 };
 
-const EmergencyContactCard = ({
-  index,
-  register,
-  errors,
-  disabled,
-  onRemove,
-  showRemove,
-}: EmergencyContactCardProps) => {
-  return (
-    <div>
-      <div>
-        <label>First Name *</label>
-        <input
-          {...register(`emergencyContacts.${index}.firstName`, {
-            required: "First name is required.",
-          })}
-          disabled={disabled}
-        />
-        {errors.emergencyContacts?.[index]?.firstName && (
-          <span>{errors.emergencyContacts[index].firstName.message}</span>
-        )}
-      </div>
-      <div>
-        <label>Last Name *</label>
-        <input
-          {...register(`emergencyContacts.${index}.lastName`, {
-            required: "Last name is required.",
-          })}
-          disabled={disabled}
-        />
-        {errors.emergencyContacts?.[index]?.lastName && (
-          <span>{errors.emergencyContacts[index].lastName.message}</span>
-        )}
-      </div>
-      <div>
-        <label>Phone *</label>
-        <input
-          {...register(`emergencyContacts.${index}.phone`, {
-            required: "Phone is required.",
-          })}
-          disabled={disabled}
-        />
-        {errors.emergencyContacts?.[index]?.phone && (
-          <span>{errors.emergencyContacts[index].phone.message}</span>
-        )}
-      </div>
-      <div>
-        <label>Email</label>
-        <input
-          {...register(`emergencyContacts.${index}.email`)}
-          disabled={disabled}
-        />
-      </div>
+// PersonalInfo, Edit/Save/Cancel
+const EditableEmergencyContacts = ({
+  defaultValues,
+  editable = true,
+}: EditableProps) => {
+  const [isEditing, setIsEditing] = useState(false);
 
-      <div>
-        <label>Relationship *</label>
-        <input
-          {...register(`emergencyContacts.${index}.relationship`, {
-            required: "Relationship is required.",
-          })}
-          disabled={disabled}
-        />
-        {errors.emergencyContacts?.[index]?.relationship && (
-          <span>{errors.emergencyContacts[index].relationship.message}</span>
+  const form = useForm({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(sectionSchema) as any,
+    defaultValues,
+  });
+
+  const onSave = async (data: FieldValues) => {
+    try {
+      await api.put("/api/employees/update", data);
+      setIsEditing(false);
+    } catch (err) {
+      handleError(err);
+    }
+  };
+
+  const onCancel = () => {
+    form.reset();
+    setIsEditing(false);
+  };
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Emergency Contacts</CardTitle>
+        {editable && (
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <Button
+                  size="sm"
+                  onClick={form.handleSubmit(onSave)}
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? "Saving..." : "Save"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={onCancel}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit
+              </Button>
+            )}
+          </div>
         )}
-      </div>
-      {showRemove && !disabled && (
-        <button type="button" onClick={onRemove}>
-          Remove
-        </button>
-      )}
-    </div>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <EmergencyContactFields form={form} disabled={!isEditing} />
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 
