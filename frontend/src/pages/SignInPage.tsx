@@ -50,7 +50,7 @@ const SignInPage = () => {
   const handleSubmit = async (data: SignInFormData) => {
     try {
       const response = await api.post("/api/auth/login", data);
-      dispatch(
+      await dispatch(
         setCredentials({
           token: response.data.token,
           employee: response.data.employee,
@@ -64,7 +64,10 @@ const SignInPage = () => {
         ) {
           navigate("/");
         } else {
+          console.log("onboardingApplication:", employee.onboardingApplication);
+          console.log("status:", employee.onboardingApplication?.status);
           navigate("/onboarding-application");
+          // setTimeout(() => navigate("/onboarding-application"));
         }
       } else {
         navigate("/");
