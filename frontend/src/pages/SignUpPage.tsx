@@ -29,6 +29,7 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import FormInput from "@/components/form/FormInput";
 
 const signUpSchema = z
   .object({
@@ -101,7 +102,7 @@ const SignUpPage = () => {
         password: data.password,
         registrationToken,
       });
-      dispatch(
+      await dispatch(
         setCredentials({
           token: response.data.token,
           employee: response.data.employee,
@@ -170,7 +171,7 @@ const SignUpPage = () => {
               className="flex flex-col gap-4"
             >
               {/* username */}
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="username"
                 render={({ field }) => (
@@ -185,6 +186,13 @@ const SignUpPage = () => {
                     <FormMessage />
                   </FormItem>
                 )}
+              /> */}
+
+              <FormInput
+                form={form}
+                name="username"
+                label="Username"
+                placeholder="Choose a unique username"
               />
 
               {/* email, readonly */}

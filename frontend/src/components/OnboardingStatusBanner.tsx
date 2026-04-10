@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { CircleCheck, Clock, CircleX } from "lucide-react";
+import { toast } from "sonner";
 
 interface OnboardingStatusBannerProps {
   applicationData: OnboardingApplication | null;
@@ -148,6 +149,12 @@ const OnboardingStatusBanner = ({
                       <Button
                         variant="destructive"
                         onClick={async () => {
+                          if (!feedback.trim()) {
+                            toast.error(
+                              "Please provide feedback before rejecting.",
+                            );
+                            return;
+                          }
                           if (onReject) await onReject(feedback);
                           setRejectOpen(false);
                         }}

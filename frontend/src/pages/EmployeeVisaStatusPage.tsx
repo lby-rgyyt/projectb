@@ -28,7 +28,7 @@ import {
   StepperPanel,
   StepperContent,
 } from "@/components/reui/stepper";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 
 const steps = ["optReceipt", "optEAD", "i983", "i20"];
 const stepLabels: Record<string, string> = {
@@ -239,7 +239,7 @@ const EmployeeVisaStatusPage = () => {
                           if (!file) return;
                           try {
                             await handleUpload(file, currentStep);
-                            toast.success("File uploaded successfully!");
+                            // toast.success("File uploaded successfully!");
                             const res = await api.get(
                               "/api/visa-status/my-visa-status",
                             );

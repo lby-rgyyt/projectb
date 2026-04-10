@@ -24,6 +24,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Check, X } from "lucide-react";
+import { toast } from "sonner";
 
 const getDaysLeft = (endDate?: string): number | string => {
   if (!endDate) return "N/A";
@@ -107,7 +108,7 @@ const VisaStatusManagementPage = () => {
 
   const handleReject = async () => {
     if (!feedback.trim()) {
-      alert("Please provide feedback before rejecting.");
+      toast.error("Please provide feedback before rejecting.");
       return;
     }
     try {
@@ -131,7 +132,7 @@ const VisaStatusManagementPage = () => {
   const handleNotify = async (vs: VisaStatus) => {
     try {
       await api.post(`/api/visa-status/notify/${vs.id}`);
-      alert("Notification has been sent.");
+      toast.success("Notification has been sent.");
     } catch (err) {
       handleError(err);
       console.log(err);

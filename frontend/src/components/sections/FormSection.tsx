@@ -37,6 +37,7 @@ const FormSection = ({
     <div className="grid gap-4 sm:grid-cols-2">
       {fields.map((fieldConfig) => {
         const fieldName = getFieldName(fieldConfig.name);
+        if (fieldConfig.visible && !fieldConfig.visible(form.watch())) return null;
 
         return (
           <FormField

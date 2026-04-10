@@ -325,7 +325,7 @@ const OnboardingApplicationPage = () => {
   const onUpload = async (file: File, fileType: string) => {
     try {
       await handleUpload(file, fileType);
-      toast.success("File uploaded successfully!");
+      // toast.success("File uploaded successfully!");
     } catch (err) {
       handleError(err);
       console.log(err);

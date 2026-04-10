@@ -125,7 +125,7 @@ const SignInPage = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <div className="flex gap-2">
+                      <fieldset className="flex gap-2">
                         <Input
                           {...field}
                           type={showPassword ? "text" : "password"}
@@ -139,7 +139,7 @@ const SignInPage = () => {
                         >
                           {showPassword ? <EyeOff /> : <Eye />}
                         </Button>
-                      </div>
+                      </fieldset>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

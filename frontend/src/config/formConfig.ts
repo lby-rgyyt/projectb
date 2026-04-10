@@ -5,6 +5,7 @@ export interface FieldConfig {
   label: string;
   type?: "text" | "date" | "select";
   options?: { value: string; label: string }[];
+  visible?: (values: Record<string, string>) => boolean;
 }
 
 // Name
@@ -90,9 +91,23 @@ export const employmentFields: FieldConfig[] = [
       { value: "Other", label: "Other" },
     ],
   },
-  { name: "visaTitle", label: "Visa Title" },
-  { name: "visaStartDate", label: "Start Date", type: "date" },
-  { name: "visaEndDate", label: "End Date", type: "date" },
+  {
+    name: "visaTitle",
+    label: "Visa Title",
+    visible: (values) => values.visaType === "Other",
+  },
+  {
+    name: "visaStartDate",
+    label: "Start Date",
+    type: "date",
+    visible: (values) => !["Citizen", "Green Card", ""].includes(values.visaType),
+  },
+  {
+    name: "visaEndDate",
+    label: "End Date",
+    type: "date",
+    visible: (values) => !["Citizen", "Green Card", ""].includes(values.visaType),
+  },
 ];
 
 export const referenceSchema = z.object({

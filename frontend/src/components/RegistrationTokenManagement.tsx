@@ -18,13 +18,11 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 
 const tokenSchema = z.object({
   name: z.string().min(1, "Employee name is required"),
-  email: z
-    .string()
-    .min(1, "Employee email is required")
-    .email("Invalid email format"),
+  email: z.email("Invalid email format").min(1, "Employee email is required"),
 });
 
 type TokenFormData = z.infer<typeof tokenSchema>;
@@ -56,6 +54,7 @@ const RegistrationTokenManagement = () => {
       setTokens(res.data.tokens);
       // clear form
       form.reset();
+      toast.success("Registration email sent successfully!");
     } catch (err) {
       handleError(err);
     }
