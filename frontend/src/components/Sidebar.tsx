@@ -13,6 +13,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { Home, User, FileText, Users, Briefcase, LogOut } from "lucide-react";
+import api from "@/utils/api";
 
 const employeeItems = [
   { path: "/", icon: Home, label: "Home" },
@@ -37,7 +38,8 @@ const AppSidebar = () => {
 
   const items = employee?.role === "hr" ? hrItems : employeeItems;
 
-  const handleClick = () => {
+  const handleClick = async () => {
+    await api.post("/api/auth/logout");
     dispatch(signout());
     navigate("/signin");
   };

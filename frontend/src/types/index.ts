@@ -75,7 +75,7 @@ export interface RegistrationToken {
 }
 
 export interface AuthState {
-  token: string | null;
+  token: boolean;
   employee: Employee | null;
   loading: boolean;
 }

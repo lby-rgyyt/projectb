@@ -22,7 +22,7 @@ export const fetchCurrentEmployee = createAsyncThunk(
 );
 
 const initialState: AuthState = {
-  token: localStorage.getItem("token"),
+  token: false,
   employee: null,
   loading: false,
 };
@@ -32,14 +32,12 @@ const authSlice = createSlice({
   initialState: initialState,
   reducers: {
     setCredentials: (state, action) => {
-      state.token = action.payload.token;
+      state.token = true;
       state.employee = action.payload.employee;
-      localStorage.setItem("token", action.payload.token);
     },
     signout: (state) => {
-      state.token = null;
+      state.token = false;
       state.employee = null;
-      localStorage.removeItem("token");
     },
   },
   extraReducers: (builder) => {
@@ -49,11 +47,12 @@ const authSlice = createSlice({
       })
       .addCase(fetchCurrentEmployee.fulfilled, (state, action) => {
         state.loading = false;
+        state.token = true;
         state.employee = action.payload;
       })
       .addCase(fetchCurrentEmployee.rejected, (state) => {
         state.loading = false;
-        state.token = null;
+        state.token = false;
         state.employee = null;
       });
   },

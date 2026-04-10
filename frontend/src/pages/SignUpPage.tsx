@@ -104,7 +104,7 @@ const SignUpPage = () => {
       });
       await dispatch(
         setCredentials({
-          token: response.data.token,
+          // token: response.data.token,
           employee: response.data.employee,
         }),
       );

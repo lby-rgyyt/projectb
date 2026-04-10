@@ -35,9 +35,16 @@ export const register = async (
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" },
     );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.status(201).json({
       success: true,
-      token,
       employee: {
         id: employee._id,
         username: employee.username,
@@ -70,25 +77,32 @@ export const login = async (
       res.status(401).json({ success: false, errors: "Invalid password" });
       return;
     }
+
     const token = jwt.sign(
       { id: employee._id, role: employee.role },
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" },
     );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.status(200).json({
       success: true,
-      token,
-      employee: {
-        id: employee._id,
-        username: employee.username,
-        email: employee.email,
-        role: employee.role,
-        onboardingApplication: employee.onboardingApplication,
-      },
+      employee: employee,
     });
   } catch (err) {
     next(err);
   }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  res.clearCookie("token");
+  res.status(200).json({ success: true });
 };
 
 export const getMe = async (

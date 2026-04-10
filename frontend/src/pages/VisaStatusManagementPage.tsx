@@ -331,7 +331,8 @@ const VisaStatusManagementPage = () => {
                           </Button>
                         </nav>
                       )}
-                      {vs.currentStatus === "pendingSubmit" && (
+                      {(vs.currentStatus === "pendingSubmit" ||
+                        vs.currentStatus === "rejected") && (
                         <Button
                           size="sm"
                           variant="outline"

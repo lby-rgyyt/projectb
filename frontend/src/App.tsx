@@ -17,19 +17,18 @@ import EmployeeVisaStatusPage from "./pages/EmployeeVisaStatusPage";
 
 
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "./store";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "./store";
 import { fetchCurrentEmployee } from "./store/slices/authSlice";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
 
-  const token = useSelector((state: RootState) => state.auth.token);
 
   useEffect(() => {
-    if (token) {
+    
       dispatch(fetchCurrentEmployee());
-    }
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

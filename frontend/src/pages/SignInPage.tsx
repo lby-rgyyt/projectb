@@ -52,7 +52,7 @@ const SignInPage = () => {
       const response = await api.post("/api/auth/login", data);
       await dispatch(
         setCredentials({
-          token: response.data.token,
+          // token: response.data.token,
           employee: response.data.employee,
         }),
       );
