@@ -161,6 +161,7 @@ const EmployeeVisaStatusPage = () => {
       <h1 className="text-2xl font-bold">Visa Status Management</h1>
 
       <Stepper
+        className="flex flex-col gap-6"
         value={steps.indexOf(activeTab) + 1}
         onValueChange={(val) => setActiveTab(steps[val - 1])}
         indicators={{ completed: <Check className="h-3 w-3" /> }}
@@ -172,6 +173,7 @@ const EmployeeVisaStatusPage = () => {
                 <StepperIndicator>{i + 1}</StepperIndicator>
                 <StepperTitle>{stepLabels[s]}</StepperTitle>
               </StepperTrigger>
+
               {i < steps.length - 1 && <StepperSeparator />}
             </StepperItem>
           ))}

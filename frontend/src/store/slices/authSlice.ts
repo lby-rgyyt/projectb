@@ -11,7 +11,6 @@ export const fetchCurrentEmployee = createAsyncThunk(
       return res.data.employee;
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        localStorage.removeItem("token");
         return rejectWithValue(
           err.response.data.error || "Authentication failed",
         );
@@ -24,7 +23,7 @@ export const fetchCurrentEmployee = createAsyncThunk(
 const initialState: AuthState = {
   token: false,
   employee: null,
-  loading: false,
+  loading: true,
 };
 
 const authSlice = createSlice({

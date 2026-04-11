@@ -47,19 +47,47 @@ import FormInput from "@/components/form/FormInput";
 import FormSelect from "@/components/form/FormSelect";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "sonner";
+import axios from "axios";
 
-const onboardingSchema = z.object({
-  ...nameSchema.shape,
-  ...contactSchema.shape,
-  ...addressSchema.shape,
-  isUnlimited: z.string().min(1, "This field is required"),
-  visaType: z.string().optional(),
-  visaTitle: z.string().optional(),
-  visaStartDate: z.string().optional(),
-  visaEndDate: z.string().optional(),
-  reference: z.object({ ...referenceSchema.shape }),
-  emergencyContacts: z.array(emergencyContactSchema).min(1),
-});
+const onboardingSchema = z
+  .object({
+    ...nameSchema.shape,
+    ...contactSchema.shape,
+    ...addressSchema.shape,
+    isUnlimited: z.string().min(1, "This field is required"),
+    visaType: z.string().min(1, "This field is required"),
+    visaTitle: z.string().optional(),
+    visaStartDate: z.string().optional(),
+    visaEndDate: z.string().optional(),
+    reference: z.object({ ...referenceSchema.shape }),
+    emergencyContacts: z.array(emergencyContactSchema).min(1),
+    optReceiptUploaded: z.boolean().optional(),
+  })
+  // F1(CPT/OPT) must upload file to start visa status tracking
+  .refine(
+    (data) =>
+      data.visaType !== "F1(CPT/OPT)" ||
+      data.isUnlimited !== "no" ||
+      data.optReceiptUploaded,
+    {
+      message: "Please upload your OPT Receipt.",
+      path: ["optReceiptUploaded"],
+    },
+    // visa holder must input visa start and end date
+  )
+  .refine(
+    (data) =>
+      data.isUnlimited !== "no" ||
+      (typeof data.visaStartDate === "string" &&
+        data.visaStartDate.trim() !== ""),
+    { message: "Start date is required.", path: ["visaStartDate"] },
+  )
+  .refine(
+    (data) =>
+      data.isUnlimited !== "no" ||
+      (typeof data.visaEndDate === "string" && data.visaEndDate.trim() !== ""),
+    { message: "End date is required.", path: ["visaEndDate"] },
+  );
 
 type OnboardingApplicationFormData = z.infer<typeof onboardingSchema>;
 
@@ -113,6 +141,7 @@ const OnboardingApplicationPage = () => {
       emergencyContacts: [
         { firstName: "", lastName: "", phone: "", email: "", relationship: "" },
       ],
+      optReceiptUploaded: false,
     },
   });
 
@@ -193,6 +222,7 @@ const OnboardingApplicationPage = () => {
                       relationship: "",
                     },
                   ],
+              optReceiptUploaded: Boolean(emp.documents?.optReceipt),
             });
           }
           // first time, no existing onboarding application
@@ -266,6 +296,7 @@ const OnboardingApplicationPage = () => {
                     relationship: "",
                   },
                 ],
+            optReceiptUploaded: Boolean(emp.documents?.optReceipt),
           });
         }
       } catch (err) {
@@ -490,7 +521,8 @@ const OnboardingApplicationPage = () => {
                 render={() => (
                   <FormItem>
                     <FormLabel>
-                      Permanent resident or citizen of the U.S.? *
+                      Permanent resident or citizen of the U.S.?
+                      <span className="text-destructive"> *</span>
                     </FormLabel>
                     <FormControl>
                       <ToggleGroup
@@ -545,21 +577,52 @@ const OnboardingApplicationPage = () => {
               )}
 
               {visaType === "F1(CPT/OPT)" && canEdit && (
-                <fieldset>
-                  <Label>Upload OPT Receipt</Label>
-                  <Input
-                    type="file"
-                    accept=".pdf"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (!applicationData) {
-                        await api.post("/api/visa-status/create");
-                      }
-                      await onUpload(file, "optReceipt");
-                    }}
-                  />
-                </fieldset>
+                <FormField
+                  control={form.control}
+                  name="optReceiptUploaded"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>
+                        Upload OPT Receipt
+                        <span className="text-destructive"> *</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept=".pdf"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              try {
+                                await api.get(
+                                  "/api/visa-status/my-visa-status",
+                                );
+                              } catch (err) {
+                                if (
+                                  axios.isAxiosError(err) &&
+                                  err.response?.status === 404
+                                ) {
+                                  await api.post("/api/visa-status/create");
+                                } else {
+                                  handleError(err);
+                                  return;
+                                }
+                              }
+                              await onUpload(file, "optReceipt");
+                              form.setValue("optReceiptUploaded", true, {
+                                shouldValidate: true,
+                              });
+                            } catch (err) {
+                              handleError(err);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
 
               {visaType === "Other" && (
@@ -572,7 +635,7 @@ const OnboardingApplicationPage = () => {
               )}
 
               {isUnlimited === "no" && (
-                <fieldset className="grid gap-4 sm:grid-cols-2">
+                <fieldset className="flex gap-4">
                   <FormInput
                     form={form}
                     name="visaStartDate"
@@ -638,7 +701,7 @@ const OnboardingApplicationPage = () => {
             <CardTitle>Upload Documents</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <fieldset>
+            <fieldset className="flex flex-col gap-4">
               <Label>Driver's License</Label>
               <Input
                 type="file"
@@ -649,7 +712,7 @@ const OnboardingApplicationPage = () => {
                 }}
               />
             </fieldset>
-            <fieldset>
+            <fieldset className="flex flex-col gap-4">
               <Label>Work Authorization Document</Label>
               <Input
                 type="file"

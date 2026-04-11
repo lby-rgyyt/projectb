@@ -31,7 +31,16 @@ const FormInput = ({
     name={name}
     render={({ field }) => (
       <FormItem>
-        <FormLabel>{label}</FormLabel>
+        <FormLabel>
+          {label.endsWith("*") ? (
+            <>
+              {label.slice(0, -1)}
+              <span className="text-destructive">*</span>
+            </>
+          ) : (
+            label
+          )}
+        </FormLabel>
         <FormControl>
           <Input
             {...field}

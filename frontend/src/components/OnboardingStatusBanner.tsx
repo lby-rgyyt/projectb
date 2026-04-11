@@ -63,7 +63,7 @@ const OnboardingStatusBanner = ({
           )}
           {status === "rejected" && (
             <Alert variant="destructive">
-              <CircleX className="h-4 w-4" />
+              {/* <CircleX className="h-8 w-8" /> */}
               <AlertTitle>Application Rejected</AlertTitle>
               <AlertDescription>
                 Please review the feedback below, make the necessary changes,
@@ -82,7 +82,6 @@ const OnboardingStatusBanner = ({
         <>
           {status === "pending" && (
             <Alert>
-              <Clock className="h-4 w-4" />
               <AlertTitle>Review Decision</AlertTitle>
               <AlertDescription>
                 After reviewing the application, approve or reject it below.
