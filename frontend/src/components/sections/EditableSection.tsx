@@ -45,6 +45,7 @@ const EditableSection = ({
     resolver: zodResolver(schema),
     defaultValues,
   });
+  const { isDirty, isSubmitting } = form.formState;
 
   const onSave = async (data: FieldValues) => {
     try {
@@ -75,15 +76,15 @@ const EditableSection = ({
                   <Button
                     size="sm"
                     onClick={form.handleSubmit(onSave)}
-                    disabled={form.formState.isSubmitting}
+                    disabled={isSubmitting}
                   >
-                    {form.formState.isSubmitting ? "Saving..." : "Save"}
+                    {isSubmitting ? "Saving..." : "Save"}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      if (form.formState.isDirty) {
+                      if (isDirty) {
                         setDiscardOpen(true);
                       } else {
                         setIsEditing(false);
