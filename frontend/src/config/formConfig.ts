@@ -6,7 +6,7 @@ export interface FieldConfig {
   type?: "text" | "date" | "select";
   options?: { value: string; label: string }[];
   visible?: (values: Record<string, string>) => boolean;
-  required?:boolean;
+  required?: boolean;
 }
 
 // Name
@@ -21,12 +21,12 @@ export const nameSchema = z.object({
 });
 
 export const nameFields: FieldConfig[] = [
-  { name: "firstName", label: "First Name" , required: true},
-  { name: "lastName", label: "Last Name" , required: true},
+  { name: "firstName", label: "First Name", required: true },
+  { name: "lastName", label: "Last Name", required: true },
   { name: "middleName", label: "Middle Name" },
   { name: "preferredName", label: "Preferred Name" },
-  { name: "ssn", label: "SSN" , required: true},
-  { name: "dateOfBirth", label: "Date of Birth", type: "date" , required: true},
+  { name: "ssn", label: "SSN", required: true },
+  { name: "dateOfBirth", label: "Date of Birth", type: "date", required: true },
   {
     name: "gender",
     label: "Gender",
@@ -35,7 +35,8 @@ export const nameFields: FieldConfig[] = [
       { value: "Male", label: "Male" },
       { value: "Female", label: "Female" },
       { value: "I do not wish to answer", label: "I do not wish to answer" },
-    ], required: true
+    ],
+    required: true,
   },
 ];
 
@@ -53,9 +54,9 @@ export const addressSchema = z.object({
 export const addressFields: FieldConfig[] = [
   { name: "address.building", label: "Building/Apt #" },
   { name: "address.streetName", label: "Street Name", required: true },
-  { name: "address.city", label: "City" , required: true},
-  { name: "address.state", label: "State" , required: true},
-  { name: "address.zip", label: "Zip" , required: true},
+  { name: "address.city", label: "City", required: true },
+  { name: "address.state", label: "State", required: true },
+  { name: "address.zip", label: "Zip", required: true },
 ];
 
 // Contact
@@ -65,17 +66,46 @@ export const contactSchema = z.object({
 });
 
 export const contactFields: FieldConfig[] = [
-  { name: "cellPhone", label: "Cell Phone" , required: true},
+  { name: "cellPhone", label: "Cell Phone", required: true },
   { name: "workPhone", label: "Work Phone" },
 ];
 
 // Employment
-export const employmentSchema = z.object({
-  visaType: z.string().min(1, "Visa type is required"),
-  visaTitle: z.string().optional(),
-  visaStartDate: z.string().optional(),
-  visaEndDate: z.string().optional(),
-});
+export const employmentSchema = z
+  .object({
+    visaType: z.string().min(1, "Visa type is required"),
+    visaTitle: z.string().optional(),
+    visaStartDate: z.string().optional(),
+    visaEndDate: z.string().optional(),
+  })
+  // visa holder must input visa start and end date
+  .refine(
+    (data) =>
+      ["Citizen", "Green Card"].includes(data.visaType) ||
+      (typeof data.visaStartDate === "string" &&
+        data.visaStartDate.trim() !== ""),
+    { message: "Start date is required.", path: ["visaStartDate"] },
+  )
+  .refine(
+    (data) =>
+      ["Citizen", "Green Card"].includes(data.visaType) ||
+      (typeof data.visaEndDate === "string" && data.visaEndDate.trim() !== ""),
+    { message: "End date is required.", path: ["visaEndDate"] },
+  )
+  // end date must be later than start date
+  .refine(
+    (data) => {
+      if (["Citizen", "Green Card"].includes(data.visaType)) return true;
+      const start = data.visaStartDate?.trim();
+      const end = data.visaEndDate?.trim();
+      if (!start || !end) return true;
+      return end > start;
+    },
+    {
+      message: "End date must be after start date.",
+      path: ["visaEndDate"],
+    },
+  );
 
 export const employmentFields: FieldConfig[] = [
   {
@@ -90,7 +120,8 @@ export const employmentFields: FieldConfig[] = [
       { value: "F1(CPT/OPT)", label: "F1(CPT/OPT)" },
       { value: "H4", label: "H4" },
       { value: "Other", label: "Other" },
-    ], required: true
+    ],
+    required: true,
   },
   {
     name: "visaTitle",
@@ -101,13 +132,17 @@ export const employmentFields: FieldConfig[] = [
     name: "visaStartDate",
     label: "Start Date",
     type: "date",
-    visible: (values) => !["Citizen", "Green Card", ""].includes(values.visaType),
+    visible: (values) =>
+      !["Citizen", "Green Card", ""].includes(values.visaType),
+    required: true,
   },
   {
     name: "visaEndDate",
     label: "End Date",
     type: "date",
-    visible: (values) => !["Citizen", "Green Card", ""].includes(values.visaType),
+    visible: (values) =>
+      !["Citizen", "Green Card", ""].includes(values.visaType),
+    required: true,
   },
 ];
 
@@ -121,8 +156,8 @@ export const referenceSchema = z.object({
 });
 
 export const referenceFields: FieldConfig[] = [
-  { name: "firstName", label: "First Name" , required: true},
-  { name: "lastName", label: "Last Name" , required: true},
+  { name: "firstName", label: "First Name", required: true },
+  { name: "lastName", label: "Last Name", required: true },
   { name: "middleName", label: "Middle Name" },
   { name: "phone", label: "Phone" },
   { name: "email", label: "Email" },
@@ -138,9 +173,9 @@ export const emergencyContactSchema = z.object({
 });
 
 export const emergencyContactFields: FieldConfig[] = [
-  { name: "firstName", label: "First Name" , required: true},
-  { name: "lastName", label: "Last Name" , required: true},
-  { name: "phone", label: "Phone" , required: true},
+  { name: "firstName", label: "First Name", required: true },
+  { name: "lastName", label: "Last Name", required: true },
+  { name: "phone", label: "Phone", required: true },
   { name: "email", label: "Email" },
   { name: "relationship", label: "Relationship", required: true },
 ];

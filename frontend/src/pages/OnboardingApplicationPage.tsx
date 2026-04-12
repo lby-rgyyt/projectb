@@ -87,6 +87,20 @@ const onboardingSchema = z
       data.isUnlimited !== "no" ||
       (typeof data.visaEndDate === "string" && data.visaEndDate.trim() !== ""),
     { message: "End date is required.", path: ["visaEndDate"] },
+  )
+  // end date must be later than start date
+  .refine(
+    (data) => {
+      if (data.isUnlimited !== "no") return true;
+      const start = data.visaStartDate?.trim();
+      const end = data.visaEndDate?.trim();
+      if (!start || !end) return true;
+      return end > start;
+    },
+    {
+      message: "End date must be after start date.",
+      path: ["visaEndDate"],
+    },
   );
 
 type OnboardingApplicationFormData = z.infer<typeof onboardingSchema>;

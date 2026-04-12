@@ -256,7 +256,7 @@ const EmployeeVisaStatusPage = () => {
 
                   {/* Preview / Download */}
                   {tabStatus !== "notStarted" && visaStatus?.documents?.[s] && (
-                    <fieldset className="flex items-center gap-2">
+                    <fieldset className="flex gap-2">
                       <p className="text-sm">Uploaded: {stepLabels[s]}</p>
                       <Button
                         size="sm"

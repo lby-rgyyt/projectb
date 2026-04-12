@@ -13,7 +13,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { CircleCheck, Clock, CircleX } from "lucide-react";
 import { toast } from "sonner";
 
 interface OnboardingStatusBannerProps {
@@ -43,7 +42,6 @@ const OnboardingStatusBanner = ({
         <>
           {status === "approved" && (
             <Alert>
-              <CircleCheck className="h-4 w-4" />
               <AlertTitle>Application Approved!</AlertTitle>
               <AlertDescription>
                 Your onboarding application has been approved. Use the sidebar
@@ -53,7 +51,6 @@ const OnboardingStatusBanner = ({
           )}
           {status === "pending" && (
             <Alert>
-              <Clock className="h-4 w-4" />
               <AlertTitle>Application Pending Review</AlertTitle>
               <AlertDescription>
                 Please wait for HR to review your application. You will be
@@ -63,15 +60,14 @@ const OnboardingStatusBanner = ({
           )}
           {status === "rejected" && (
             <Alert variant="destructive">
-              {/* <CircleX className="h-8 w-8" /> */}
               <AlertTitle>Application Rejected</AlertTitle>
               <AlertDescription>
                 Please review the feedback below, make the necessary changes,
                 and resubmit your application.
               </AlertDescription>
-              <p className="mt-2 text-sm font-medium">
+              <AlertDescription>
                 HR Feedback: {applicationData.feedback}
-              </p>
+              </AlertDescription>
             </Alert>
           )}
         </>
@@ -169,7 +165,6 @@ const OnboardingStatusBanner = ({
 
           {status === "rejected" && (
             <Alert variant="destructive">
-              <CircleX className="h-4 w-4" />
               <AlertTitle>Application Rejected</AlertTitle>
               <AlertDescription>
                 Feedback: {applicationData.feedback}
@@ -179,7 +174,6 @@ const OnboardingStatusBanner = ({
 
           {status === "approved" && (
             <Alert>
-              <CircleCheck className="h-4 w-4" />
               <AlertTitle>Application Approved</AlertTitle>
             </Alert>
           )}

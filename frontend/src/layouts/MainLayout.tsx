@@ -4,12 +4,7 @@ import { useSelector } from "react-redux";
 import { Outlet } from "react-router-dom";
 import type { RootState } from "../store";
 import { Toaster } from "@/components/ui/sonner";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const MainLayout = () => {
@@ -20,7 +15,7 @@ const MainLayout = () => {
   if (loading || (token && !employee)) {
     return (
       <main className="flex flex-col gap-6">
-        <Card>
+        <Card >
           <CardHeader>
             <CardTitle>
               <Skeleton className="h-10 w-48" />
@@ -37,7 +32,7 @@ const MainLayout = () => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6"> 
         <SidebarTrigger />
         <Outlet />
       </main>
