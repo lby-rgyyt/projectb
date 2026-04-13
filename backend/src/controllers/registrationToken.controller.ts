@@ -15,9 +15,16 @@ export const sendRegistrationEmail = async (
       return;
     }
     const { name, email } = req.body;
+    const existingEmployee = await Employee.findOne({ email });
+    if (existingEmployee) {
+      res
+        .status(409)
+        .json({ success: false, error: "This email is already registered." });
+      return;
+    }
     const existing = await RegisterToken.findOne({ email });
     if (existing) {
-      res.status(409).json({ success: false, message: "Email already sent." });
+      res.status(409).json({ success: false, error: "Email already sent." });
       return;
     }
 

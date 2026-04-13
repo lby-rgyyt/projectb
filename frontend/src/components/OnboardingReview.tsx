@@ -14,6 +14,17 @@ import {
 } from "@/components/ui/table";
 
 const OnboardingReview = () => {
+  const [applications, setApplications] = useState<OnboardingApplication[]>([]);
+  useEffect(() => {
+    const fetchAll = async () => {
+      const res = await api.get("/api/onboarding-applications/all");
+      setApplications(res.data.onboardingApplications);
+    };
+    fetchAll();
+  }, []);
+  const pending = applications.filter((a) => a.status === "pending");
+  const rejected = applications.filter((a) => a.status === "rejected");
+  const approved = applications.filter((a) => a.status === "approved");
   return (
     <Tabs defaultValue="pending">
       <TabsList>
@@ -23,39 +34,31 @@ const OnboardingReview = () => {
       </TabsList>
 
       <TabsContent value="pending">
-        <ApplicationList status="pending" />
+        <ApplicationList applications={pending} />
       </TabsContent>
       <TabsContent value="rejected">
-        <ApplicationList status="rejected" />
+        <ApplicationList applications={rejected} />
       </TabsContent>
       <TabsContent value="approved">
-        <ApplicationList status="approved" />
+        <ApplicationList applications={approved} />
       </TabsContent>
     </Tabs>
   );
 };
 
-const ApplicationList = ({ status }: { status: string }) => {
-  const [applications, setApplications] = useState<OnboardingApplication[]>([]);
-
-  useEffect(() => {
-    const fetch = async () => {
-      const res = await api.get("/api/onboarding-applications/all", {
-        params: { status },
-      });
-      setApplications(res.data.onboardingApplications);
-    };
-    fetch();
-  }, [status]);
-
+const ApplicationList = ({
+  applications,
+}: {
+  applications: OnboardingApplication[];
+}) => {
   return (
-    <Table>
+    <Table className="table-fixed">
       <TableHeader>
         <TableRow>
-          <TableHead>Full Name</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Submitted</TableHead>
-          <TableHead>Action</TableHead>
+          <TableHead className="w-1/4">Full Name</TableHead>
+          <TableHead className="w-1/4">Email</TableHead>
+          <TableHead className="w-1/4">Submitted</TableHead>
+          <TableHead className="w-1/4">Action</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -67,7 +70,7 @@ const ApplicationList = ({ status }: { status: string }) => {
               <TableCell>{emp.email}</TableCell>
               <TableCell>{application.createdAt}</TableCell>
               <TableCell>
-                <Button variant="link" asChild>
+                <Button asChild>
                   <Link
                     to={`/employees/onboarding-application/${emp.id}`}
                     target="_blank"

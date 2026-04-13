@@ -19,6 +19,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import axios from "axios";
 
 const tokenSchema = z.object({
   name: z.string().min(1, "Employee name is required"),
@@ -56,7 +57,14 @@ const RegistrationTokenManagement = () => {
       form.reset();
       toast.success("Registration email sent successfully!");
     } catch (err) {
-      handleError(err);
+      if (axios.isAxiosError(err) && err.response) {
+        const msg = err.response.data.error;
+        if (typeof msg === "string") {
+          form.setError("email", { message: msg });
+        }
+      } else {
+        handleError(err);
+      }
     }
   };
 
@@ -116,7 +124,9 @@ const RegistrationTokenManagement = () => {
                 <TableRow key={t.id}>
                   <TableCell>{t.email}</TableCell>
                   <TableCell>{t.name}</TableCell>
-                  <TableCell className="max-w-32 truncate"><a href={t.link}>{t.link}</a></TableCell>
+                  <TableCell className="max-w-32 truncate">
+                    <a href={t.link}>{t.link}</a>
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={
