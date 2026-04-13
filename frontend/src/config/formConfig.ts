@@ -184,3 +184,7 @@ export const emergencyContactFields: FieldConfig[] = [
   { name: "email", label: "Email" },
   { name: "relationship", label: "Relationship", required: true },
 ];
+
+export const emergencySectionSchema = z.object({
+  emergencyContacts: z.array(emergencyContactSchema).min(1),
+});

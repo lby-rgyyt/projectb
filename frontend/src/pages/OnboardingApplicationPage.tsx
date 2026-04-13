@@ -39,7 +39,7 @@ import {
 import FormSection from "@/components/sections/FormSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import EmergencyContactSection from "@/components/sections/EmergencyContactSection";
+import EmergencyContactFields from "@/components/sections/EmergencyContactSection";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import DocumentsSection from "@/components/sections/DocumentsSection";
@@ -641,7 +641,7 @@ const OnboardingApplicationPage = () => {
               <CardTitle>Emergency Contacts</CardTitle>
             </CardHeader>
             <CardContent>
-              <EmergencyContactSection form={form} disabled={disabled} />
+              <EmergencyContactFields form={form} disabled={disabled} />
             </CardContent>
           </Card>
 

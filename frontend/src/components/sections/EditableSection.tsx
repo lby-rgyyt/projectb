@@ -1,12 +1,10 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
-import type { FieldValues } from "react-hook-form";
-import type { FieldConfig } from "@/config/formConfig";
+import type { FieldValues, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import FormSection from "./FormSection";
 import api from "@/utils/api";
 import { handleError } from "@/utils/error";
 import {
@@ -24,19 +22,18 @@ interface EditableSectionProps {
   title: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: any;
-  fields: FieldConfig[];
   defaultValues: FieldValues;
   editable?: boolean;
-  namePrefix?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  renderContent: (form: UseFormReturn<any>, disabled: boolean) => ReactNode;
 }
 
 const EditableSection = ({
   title,
   schema,
-  fields,
   defaultValues,
   editable = true,
-  namePrefix,
+  renderContent
 }: EditableSectionProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -107,12 +104,13 @@ const EditableSection = ({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <FormSection
+            {/* <FormSection
               form={form}
               fields={fields}
               disabled={!isEditing}
               namePrefix={namePrefix}
-            />
+            /> */}
+            {renderContent(form, !isEditing)}
           </Form>
         </CardContent>
       </Card>

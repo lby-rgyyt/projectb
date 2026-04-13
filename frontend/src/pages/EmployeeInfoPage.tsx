@@ -3,9 +3,7 @@ import { useParams } from "react-router-dom";
 import type { Employee } from "../types";
 import api from "../utils/api";
 import { handleError } from "../utils/error";
-import NameSection from "../components/sections/NameSection";
 import EditableSection from "../components/sections/EditableSection";
-import EmergencyContactSection from "../components/sections/EmergencyContactSection";
 import DocumentsSection from "../components/sections/DocumentsSection";
 import {
   addressSchema,
@@ -14,8 +12,14 @@ import {
   contactFields,
   employmentSchema,
   employmentFields,
+  emergencySectionSchema,
+  nameSchema,
+  nameFields,
 } from "../config/formConfig";
 import { toast } from "sonner";
+import FormSection from "@/components/sections/FormSection";
+import AdditionalNameSection from "@/components/sections/AdditionalNameSection";
+import EmergencyContactFields from "@/components/sections/EmergencyContactSection";
 
 const EmployeeInfoPage = () => {
   // hr: /employees/:id
@@ -77,7 +81,10 @@ const EmployeeInfoPage = () => {
       </h1>
 
       {/* Name */}
-      <NameSection
+
+      <EditableSection
+        title="Name"
+        schema={nameSchema}
         defaultValues={{
           firstName: employee.firstName || "",
           lastName: employee.lastName || "",
@@ -87,17 +94,25 @@ const EmployeeInfoPage = () => {
           dateOfBirth: employee.dateOfBirth?.split("T")[0] || "",
           gender: employee.gender || "",
         }}
-        email={employee.email}
+        renderContent={(form, disabled) => (
+          <>
+            {/* email and profilePicture */}
+            <AdditionalNameSection
+              email={employee.email}
+              profilePicture={employee.profilePicture}
+              onUploadPicture={onUploadPicture}
+              disabled={disabled}
+            />
+            <FormSection form={form} fields={nameFields} disabled={disabled} />
+          </>
+        )}
         editable={editable}
-        profilePicture={employee.profilePicture}
-        onUploadPicture={onUploadPicture}
       />
 
       {/* Address */}
       <EditableSection
         title="Address"
         schema={addressSchema}
-        fields={addressFields}
         defaultValues={{
           address: {
             building: employee.address?.building || "",
@@ -107,6 +122,9 @@ const EmployeeInfoPage = () => {
             zip: employee.address?.zip || "",
           },
         }}
+        renderContent={(form, disabled) => (
+          <FormSection form={form} fields={addressFields} disabled={disabled} />
+        )}
         editable={editable}
       />
 
@@ -114,11 +132,13 @@ const EmployeeInfoPage = () => {
       <EditableSection
         title="Contact Info"
         schema={contactSchema}
-        fields={contactFields}
         defaultValues={{
           cellPhone: employee.cellPhone || "",
           workPhone: employee.workPhone || "",
         }}
+        renderContent={(form, disabled) => (
+          <FormSection form={form} fields={contactFields} disabled={disabled} />
+        )}
         editable={editable}
       />
 
@@ -126,17 +146,25 @@ const EmployeeInfoPage = () => {
       <EditableSection
         title="Employment"
         schema={employmentSchema}
-        fields={employmentFields}
         defaultValues={{
           visaType: employee.visaType || "",
           visaTitle: employee.visaTitle || "",
           visaStartDate: employee.visaStartDate?.split("T")[0] || "",
           visaEndDate: employee.visaEndDate?.split("T")[0] || "",
         }}
+        renderContent={(form, disabled) => (
+          <FormSection
+            form={form}
+            fields={employmentFields}
+            disabled={disabled}
+          />
+        )}
         editable={editable}
       />
 
-      <EmergencyContactSection
+      <EditableSection
+        title="Emergency Contacts"
+        schema={emergencySectionSchema}
         defaultValues={{
           emergencyContacts: employee.emergencyContacts?.length
             ? employee.emergencyContacts.map((c) => ({
@@ -156,6 +184,9 @@ const EmployeeInfoPage = () => {
                 },
               ],
         }}
+        renderContent={(form, disabled) => (
+          <EmergencyContactFields form={form} disabled={disabled} />
+        )}
         editable={editable}
       />
 
