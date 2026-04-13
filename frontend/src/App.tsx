@@ -15,7 +15,6 @@ import HiringManagementPage from "./pages/HiringManagementPage";
 import VisaStatusManagementPage from "./pages/VisaStatusManagementPage";
 import EmployeeVisaStatusPage from "./pages/EmployeeVisaStatusPage";
 
-
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "./store";
@@ -24,13 +23,10 @@ import { fetchCurrentEmployee } from "./store/slices/authSlice";
 function App() {
   const dispatch = useDispatch<AppDispatch>();
 
-
   useEffect(() => {
-    
-      dispatch(fetchCurrentEmployee());
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    dispatch(fetchCurrentEmployee());
+  }, [dispatch]);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -47,8 +43,10 @@ function App() {
               element={<OnboardingApplicationPage />}
             />
             <Route path="/personal-info" element={<EmployeeInfoPage />} />
-            <Route path="/my-visa-status" element={<EmployeeVisaStatusPage />} />
-
+            <Route
+              path="/my-visa-status"
+              element={<EmployeeVisaStatusPage />}
+            />
 
             <Route element={<HRRoute />}>
               <Route path="/employees" element={<EmployeeProfilesPage />} />
@@ -56,7 +54,10 @@ function App() {
                 path="/employees/onboarding-application/:id"
                 element={<OnboardingApplicationPage />}
               />
-              <Route path="/visa-status" element={<VisaStatusManagementPage />} />
+              <Route
+                path="/visa-status"
+                element={<VisaStatusManagementPage />}
+              />
               <Route path="/employees/:id" element={<EmployeeInfoPage />} />
               <Route path="/hiring" element={<HiringManagementPage />} />
             </Route>

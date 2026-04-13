@@ -34,7 +34,7 @@ const FormSection = ({
     namePrefix ? `${namePrefix}.${name}` : name;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <section className="grid gap-4 sm:grid-cols-2">
       {fields.map((fieldConfig) => {
         const fieldName = getFieldName(fieldConfig.name);
         if (fieldConfig.visible && !fieldConfig.visible(form.watch()))
@@ -85,7 +85,7 @@ const FormSection = ({
           />
         );
       })}
-    </div>
+    </section>
   );
 };
 

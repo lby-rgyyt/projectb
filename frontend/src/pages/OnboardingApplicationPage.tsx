@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 import api from "../utils/api";
 import { handleUpload } from "../utils/document";
-import type { OnboardingApplication, Contact } from "../types";
+import type { OnboardingApplication, Contact, Employee } from "../types";
 import { useNavigate, useParams } from "react-router-dom";
 import OnboardingStatusBanner from "../components/OnboardingStatusBanner";
 import { handleError } from "../utils/error";
@@ -63,6 +63,10 @@ const onboardingSchema = z
     emergencyContacts: z.array(emergencyContactSchema).min(1),
     optReceiptUploaded: z.boolean().optional(),
   })
+  .refine((data) => data.visaType !== "Other" || data.visaTitle, {
+    message: "Visa title is required.",
+    path: ["visaTitle"],
+  })
   // F1(CPT/OPT) must upload file to start visa status tracking
   .refine(
     (data) =>
@@ -104,6 +108,61 @@ const onboardingSchema = z
   );
 
 type OnboardingApplicationFormData = z.infer<typeof onboardingSchema>;
+
+const buildFormValues = (emp: Employee) => ({
+  firstName: emp.firstName || "",
+  lastName: emp.lastName || "",
+  middleName: emp.middleName || "",
+  preferredName: emp.preferredName || "",
+  cellPhone: emp.cellPhone || "",
+  workPhone: emp.workPhone || "",
+  ssn: emp.ssn || "",
+  dateOfBirth: emp.dateOfBirth?.split("T")[0] || "",
+  gender: emp.gender || "",
+  address: {
+    building: emp.address?.building || "",
+    streetName: emp.address?.streetName || "",
+    city: emp.address?.city || "",
+    state: emp.address?.state || "",
+    zip: emp.address?.zip || "",
+  },
+  isUnlimited:
+    emp.visaType === "Citizen" || emp.visaType === "Green Card"
+      ? "yes"
+      : emp.visaType
+        ? "no"
+        : "",
+  visaType: emp.visaType || "",
+  visaTitle: emp.visaTitle || "",
+  visaStartDate: emp.visaStartDate?.split("T")[0] || "",
+  visaEndDate: emp.visaEndDate?.split("T")[0] || "",
+  reference: {
+    firstName: emp.reference?.firstName || "",
+    lastName: emp.reference?.lastName || "",
+    middleName: emp.reference?.middleName || "",
+    phone: emp.reference?.phone || "",
+    email: emp.reference?.email || "",
+    relationship: emp.reference?.relationship || "",
+  },
+  emergencyContacts: emp.emergencyContacts?.length
+    ? emp.emergencyContacts.map((c: Contact) => ({
+        firstName: c.firstName || "",
+        lastName: c.lastName || "",
+        phone: c.phone || "",
+        email: c.email || "",
+        relationship: c.relationship || "",
+      }))
+    : [
+        {
+          firstName: "",
+          lastName: "",
+          phone: "",
+          email: "",
+          relationship: "",
+        },
+      ],
+  optReceiptUploaded: Boolean(emp.documents?.optReceipt),
+});
 
 const OnboardingApplicationPage = () => {
   const navigate = useNavigate();
@@ -184,60 +243,7 @@ const OnboardingApplicationPage = () => {
             }
 
             // set form data
-            form.reset({
-              firstName: emp.firstName || "",
-              lastName: emp.lastName || "",
-              middleName: emp.middleName || "",
-              preferredName: emp.preferredName || "",
-              cellPhone: emp.cellPhone || "",
-              workPhone: emp.workPhone || "",
-              ssn: emp.ssn || "",
-              dateOfBirth: emp.dateOfBirth?.split("T")[0] || "",
-              gender: emp.gender || "",
-              address: {
-                building: emp.address?.building || "",
-                streetName: emp.address?.streetName || "",
-                city: emp.address?.city || "",
-                state: emp.address?.state || "",
-                zip: emp.address?.zip || "",
-              },
-              isUnlimited:
-                emp.visaType === "Citizen" || emp.visaType === "Green Card"
-                  ? "yes"
-                  : emp.visaType
-                    ? "no"
-                    : "",
-              visaType: emp.visaType || "",
-              visaTitle: emp.visaTitle || "",
-              visaStartDate: emp.visaStartDate?.split("T")[0] || "",
-              visaEndDate: emp.visaEndDate?.split("T")[0] || "",
-              reference: {
-                firstName: emp.reference?.firstName || "",
-                lastName: emp.reference?.lastName || "",
-                middleName: emp.reference?.middleName || "",
-                phone: emp.reference?.phone || "",
-                email: emp.reference?.email || "",
-                relationship: emp.reference?.relationship || "",
-              },
-              emergencyContacts: emp.emergencyContacts?.length
-                ? emp.emergencyContacts.map((c: Contact) => ({
-                    firstName: c.firstName || "",
-                    lastName: c.lastName || "",
-                    phone: c.phone || "",
-                    email: c.email || "",
-                    relationship: c.relationship || "",
-                  }))
-                : [
-                    {
-                      firstName: "",
-                      lastName: "",
-                      phone: "",
-                      email: "",
-                      relationship: "",
-                    },
-                  ],
-              optReceiptUploaded: Boolean(emp.documents?.optReceipt),
-            });
+            form.reset(buildFormValues(emp));
           }
           // first time, no existing onboarding application
           else {
@@ -258,60 +264,7 @@ const OnboardingApplicationPage = () => {
             setDocuments(emp.documents);
           }
           // set form data
-          form.reset({
-            firstName: emp.firstName || "",
-            lastName: emp.lastName || "",
-            middleName: emp.middleName || "",
-            preferredName: emp.preferredName || "",
-            cellPhone: emp.cellPhone || "",
-            workPhone: emp.workPhone || "",
-            ssn: emp.ssn || "",
-            dateOfBirth: emp.dateOfBirth?.split("T")[0] || "",
-            gender: emp.gender || "",
-            address: {
-              building: emp.address?.building || "",
-              streetName: emp.address?.streetName || "",
-              city: emp.address?.city || "",
-              state: emp.address?.state || "",
-              zip: emp.address?.zip || "",
-            },
-            isUnlimited:
-              emp.visaType === "Citizen" || emp.visaType === "Green Card"
-                ? "yes"
-                : emp.visaType
-                  ? "no"
-                  : "",
-            visaType: emp.visaType || "",
-            visaTitle: emp.visaTitle || "",
-            visaStartDate: emp.visaStartDate?.split("T")[0] || "",
-            visaEndDate: emp.visaEndDate?.split("T")[0] || "",
-            reference: {
-              firstName: emp.reference?.firstName || "",
-              lastName: emp.reference?.lastName || "",
-              middleName: emp.reference?.middleName || "",
-              phone: emp.reference?.phone || "",
-              email: emp.reference?.email || "",
-              relationship: emp.reference?.relationship || "",
-            },
-            emergencyContacts: emp.emergencyContacts?.length
-              ? emp.emergencyContacts.map((c: Contact) => ({
-                  firstName: c.firstName || "",
-                  lastName: c.lastName || "",
-                  phone: c.phone || "",
-                  email: c.email || "",
-                  relationship: c.relationship || "",
-                }))
-              : [
-                  {
-                    firstName: "",
-                    lastName: "",
-                    phone: "",
-                    email: "",
-                    relationship: "",
-                  },
-                ],
-            optReceiptUploaded: Boolean(emp.documents?.optReceipt),
-          });
+          form.reset(buildFormValues(emp));
         }
       } catch (err) {
         handleError(err);
@@ -427,10 +380,8 @@ const OnboardingApplicationPage = () => {
               access to the portal.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Redirecting to homepage in {redirectCountdown} seconds...
-            </p>
+          <CardContent className="text-sm text-muted-foreground">
+            Redirecting to homepage in {redirectCountdown} seconds...
           </CardContent>
         </Card>
       </main>

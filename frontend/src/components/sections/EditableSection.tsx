@@ -65,12 +65,11 @@ const EditableSection = ({
 
   return (
     <>
-      {" "}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{title}</CardTitle>
           {editable && (
-            <div className="flex gap-2">
+            <section className="flex gap-2">
               {isEditing ? (
                 <>
                   <Button
@@ -103,7 +102,7 @@ const EditableSection = ({
                   Edit
                 </Button>
               )}
-            </div>
+            </section>
           )}
         </CardHeader>
         <CardContent>
@@ -118,7 +117,7 @@ const EditableSection = ({
         </CardContent>
       </Card>
       <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
-        <AlertDialogContent >
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
               Are you sure to discard all changes?

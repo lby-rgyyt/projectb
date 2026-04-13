@@ -78,6 +78,10 @@ export const employmentSchema = z
     visaStartDate: z.string().optional(),
     visaEndDate: z.string().optional(),
   })
+  .refine((data) => data.visaType !== "Other" || data.visaTitle, {
+    message: "Visa title is required.",
+    path: ["visaTitle"],
+  })
   // visa holder must input visa start and end date
   .refine(
     (data) =>
@@ -127,6 +131,7 @@ export const employmentFields: FieldConfig[] = [
     name: "visaTitle",
     label: "Visa Title",
     visible: (values) => values.visaType === "Other",
+    required:true,
   },
   {
     name: "visaStartDate",

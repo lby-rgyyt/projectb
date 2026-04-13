@@ -175,7 +175,9 @@ const VisaStatusManagementPage = () => {
             <DialogDescription>Please provide feedback:</DialogDescription>
           </DialogHeader>
           <fieldset className="flex flex-col gap-2">
-            <Label>Feedback *</Label>
+            <Label>
+              Feedback<span className="text-destructive">*</span>
+            </Label>
             <Input
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}

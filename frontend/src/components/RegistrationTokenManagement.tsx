@@ -116,7 +116,7 @@ const RegistrationTokenManagement = () => {
                 <TableRow key={t.id}>
                   <TableCell>{t.email}</TableCell>
                   <TableCell>{t.name}</TableCell>
-                  <TableCell className="max-w-xs truncate">{t.link}</TableCell>
+                  <TableCell className="max-w-32 truncate"><a href={t.link}>{t.link}</a></TableCell>
                   <TableCell>
                     <Badge
                       variant={
