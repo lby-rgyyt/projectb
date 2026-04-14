@@ -219,12 +219,6 @@ const VisaStatusManagementPage = () => {
           {selectedDocVisa?.documents &&
           Object.keys(selectedDocVisa.documents).length > 0 ? (
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
               <TableBody>
                 {Object.entries(selectedDocVisa.documents).map(
                   ([type, docId]) => (

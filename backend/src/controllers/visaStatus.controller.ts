@@ -15,7 +15,7 @@ export const getMyVisaStatus = async (
       return;
     }
     const employeeId = req.employee.id;
-    const visaStatus = await VisaStatus.findOne({ employeeId: employeeId });
+    const visaStatus = await VisaStatus.findOne({ employeeId: employeeId }).populate("employeeId");
     if (!visaStatus) {
       res.status(404).json({ success: false, error: "Visa status not found" });
       return;
@@ -91,7 +91,7 @@ export const updateVisaStatus = async (
       id,
       { $set: updates },
       { new: true },
-    );
+    ).populate("employeeId");
 
     if (!visaStatus) {
       res
@@ -123,7 +123,7 @@ export const approveCurrentStep = async (
       return;
     }
 
-    const visaStatus = await VisaStatus.findById(id);
+    const visaStatus = await VisaStatus.findById(id).populate("employeeId");
     if (!visaStatus) {
       res
         .status(404)

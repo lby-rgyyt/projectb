@@ -95,7 +95,7 @@ const EmployeeInfoPage = () => {
           gender: employee.gender || "",
         }}
         renderContent={(form, disabled) => (
-          <>
+          <section className="flex flex-col gap-4">
             {/* email and profilePicture */}
             <AdditionalNameSection
               email={employee.email}
@@ -104,7 +104,7 @@ const EmployeeInfoPage = () => {
               disabled={disabled}
             />
             <FormSection form={form} fields={nameFields} disabled={disabled} />
-          </>
+          </section>
         )}
         editable={editable}
       />

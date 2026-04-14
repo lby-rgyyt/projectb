@@ -22,10 +22,22 @@ export const sendRegistrationEmail = async (
         .json({ success: false, error: "This email is already registered." });
       return;
     }
+
     const existing = await RegisterToken.findOne({ email });
     if (existing) {
-      res.status(409).json({ success: false, error: "Email already sent." });
-      return;
+      const threeHours = 3 * 60 * 60 * 1000;
+      const isExpired =
+        existing.status === "expired" ||
+        Date.now() - existing.createdAt.getTime() > threeHours;
+      if (!isExpired) {
+        res.status(409).json({
+          success: false,
+          error:
+            "A registration link has already been sent and is still valid.",
+        });
+        return;
+      }
+      await existing.deleteOne();
     }
 
     const token = crypto.randomBytes(32).toString("hex");

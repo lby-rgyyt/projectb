@@ -15,7 +15,7 @@ export const nameSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   middleName: z.string().optional(),
   preferredName: z.string().optional(),
-  ssn: z.string().min(1, "SSN is required"),
+  ssn: z.string().min(1, "SSN is required").regex(/^\d{3}-\d{2}-\d{4}$/, "SSN must be in XXX-XX-XXXX format"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   gender: z.string().min(1, "Gender is required"),
 });

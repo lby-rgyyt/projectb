@@ -42,7 +42,7 @@ const AdditionalNameSection = ({
       </fieldset>
 
       {/* Email, readonly */}
-      <fieldset>
+      <fieldset className="flex flex-col gap-2">
         <Label>Email</Label>
         <Input value={email} disabled />
       </fieldset>

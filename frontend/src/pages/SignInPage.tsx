@@ -62,7 +62,7 @@ const SignInPage = () => {
           employee.onboardingApplication &&
           employee.onboardingApplication.status === "approved"
         ) {
-          navigate("/");
+          navigate("/personal-info");
         } else {
           console.log("onboardingApplication:", employee.onboardingApplication);
           console.log("status:", employee.onboardingApplication?.status);

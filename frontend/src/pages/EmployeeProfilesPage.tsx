@@ -76,7 +76,7 @@ const EmployeeProfiles = () => {
                       target="_blank"
                       className="text-primary underline"
                     >
-                      {`${employee.lastName || ""}, ${employee.firstName || ""}`}
+                      {`${employee.firstName || ""} ${employee.lastName || ""}`}
                     </Link>
                   </TableCell>
                   <TableCell>{maskSSN(employee.ssn || "")}</TableCell>

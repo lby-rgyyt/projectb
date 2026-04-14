@@ -47,7 +47,7 @@ export const getEmployeesByName = async (
     const { name } = req.query;
     // no query, retuan all employees
     if (!name || typeof name !== "string") {
-      const employees = await Employee.find();
+      const employees = await Employee.find().sort({ lastName: 1 });
       res.status(200).json({ success: true, employees: employees });
       return;
     }

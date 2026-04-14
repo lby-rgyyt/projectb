@@ -55,7 +55,7 @@ const EditableSection = ({
   };
 
   const onDiscard = () => {
-    form.reset(defaultValues);
+    form.reset();
     setIsEditing(false);
     setDiscardOpen(false);
   };
