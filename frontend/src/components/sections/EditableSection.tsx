@@ -63,7 +63,7 @@ const EditableSection = ({
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row justify-between">
           <CardTitle>{title}</CardTitle>
           {editable && (
             <section className="flex gap-2">

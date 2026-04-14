@@ -61,7 +61,7 @@ export const addressFields: FieldConfig[] = [
 
 // Contact
 export const contactSchema = z.object({
-  cellPhone: z.string().min(1, "Cell phone is required"),
+  cellPhone: z.string().min(1, "Cell phone is required").regex(/^\d{3}-\d{3}-\d{4}$/, "Cell phone number must be in XXX-XXX-XXXX format"),
   workPhone: z.string().optional(),
 });
 
@@ -155,7 +155,7 @@ export const referenceSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   middleName: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z.string().regex(/^\d{3}-\d{3}-\d{4}$/, "Phone number must be in XXX-XXX-XXXX format").optional(),
   email: z.email().optional(),
   relationship: z.string().min(1, "Relationship is required"),
 });
@@ -172,7 +172,7 @@ export const referenceFields: FieldConfig[] = [
 export const emergencyContactSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  phone: z.string().min(1, "Phone is required"),
+  phone: z.string().min(1, "Phone is required").regex(/^\d{3}-\d{3}-\d{4}$/, "Phone number must be in XXX-XXX-XXXX format"),
   email: z.email().optional(),
   relationship: z.string().min(1, "Relationship is required"),
 });
