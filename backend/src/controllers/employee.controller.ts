@@ -106,6 +106,10 @@ export const updateEmployeeInfo = async (
       "workPhone",
       "reference",
       "emergencyContacts",
+      "visaType",
+      "visaTitle",
+      "visaStartDate",
+      "visaEndDate",
     ];
     const updates: Record<string, any> = {};
     for (const field of allowedFields) {

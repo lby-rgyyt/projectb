@@ -235,7 +235,7 @@ export const createVisaStatus = async (
     const visaStatus = await VisaStatus.create({
       employeeId: req.employee.id,
       currentStep: "optReceipt",
-      currentStatus: "pendingSubmit",
+      currentStatus: "pendingApprove",
     });
 
     // 关联到 employee

@@ -110,7 +110,9 @@ export const previewDocument = async (
       res.status(401).json({ success: false, error: "Not authenticated" });
       return;
     }
+    console.log("Previewing document with ID:", req.params.id);
     const doc = await FileDocument.findById(req.params.id);
+    
     if (!doc) {
       res.status(404).json({ success: false, message: "Document not found" });
       return;
